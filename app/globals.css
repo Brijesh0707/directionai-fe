@@ -1,26 +1,134 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
+  /* =========================
+     Direction AI Brand Colors
+  ========================== */
+  --primary: #0B04CF;
+  --secondary: #1208E8;
+  --tertiary: #800500;
+  --neutral: #777682;
+
+  /* =========================
+     Background & Text
+  ========================== */
+  --background: #F3F1F8;
   --foreground: #171717;
+
+  /* =========================
+     Card & UI
+  ========================== */
+  --card: #ECEAF3;
+  --card-foreground: #1E1E2A;
+  --border: #D8D5E2;
+  --input: #E6E3EF;
+  --ring: #0B04CF;
+
+  /* =========================
+     Muted
+  ========================== */
+  --muted: #A2A0B3;
+  --muted-foreground: #5F5D6B;
+
+  /* =========================
+     Radius
+  ========================== */
+  --radius: 18px;
 }
 
 @theme inline {
+  /* Core */
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+
+  /* Brand */
+  --color-primary: var(--primary);
+  --color-secondary: var(--secondary);
+  --color-tertiary: var(--tertiary);
+  --color-neutral: var(--neutral);
+
+  /* UI */
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  /* Muted */
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+
+  /* Fonts */
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+
+  /* Radius */
+  --radius-sm: calc(var(--radius) - 6px);
+  --radius-md: calc(var(--radius) - 3px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 6px);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* =========================
+   Dark Mode
+========================== */
+.dark {
+  --background: #0E0E14;
+  --foreground: #F5F5F7;
+
+  --card: #171720;
+  --card-foreground: #FFFFFF;
+
+  --border: #262635;
+  --input: #1D1D2A;
+
+  --muted: #8A8A9A;
+  --muted-foreground: #B7B7C9;
+}
+
+/* =========================
+   Base Styles
+========================== */
+* {
+  border-color: var(--border);
+}
+
+html {
+  scroll-behavior: smooth;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+  min-height: 100vh;
+}
+
+/* =========================
+   Custom Utility Classes
+========================== */
+.glass-card {
+  background: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--border);
+}
+
+.dark .glass-card {
+  background: rgba(20, 20, 30, 0.7);
+}
+
+.gradient-primary {
+  background: linear-gradient(
+    135deg,
+    var(--primary),
+    var(--secondary)
+  );
+}
+
+.gradient-danger {
+  background: linear-gradient(
+    135deg,
+    var(--tertiary),
+    #b30a00
+  );
 }

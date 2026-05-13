@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import Link from "next/link";
 import {
   ArrowRight,
   Sparkles,
@@ -62,7 +63,7 @@ const LastCTA = () => {
         <div className="mt-12 flex flex-col sm:flex-row items-center justify-center gap-5">
 
           {/* PRIMARY BUTTON */}
-          <button className="group h-16 px-10 rounded-2xl bg-white text-primary font-bold text-lg shadow-2xl hover:scale-[1.03] active:scale-[0.98] transition-all duration-300 flex items-center gap-3">
+          <Link href="/login" className="group h-16 px-10 rounded-2xl bg-white text-primary font-bold text-lg shadow-2xl hover:scale-[1.03] active:scale-[0.98] transition-all duration-300 flex items-center gap-3">
 
             Start Building Now
 
@@ -70,7 +71,7 @@ const LastCTA = () => {
               size={22}
               className="transition-transform duration-300 group-hover:translate-x-1"
             />
-          </button>
+          </Link>
 
           {/* SECONDARY BUTTON */}
           <button className="h-16 px-10 rounded-2xl border border-white/15 bg-white/5 backdrop-blur-xl text-white font-semibold text-lg hover:bg-white/10 transition-all duration-300">

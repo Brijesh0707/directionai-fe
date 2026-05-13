@@ -1,6 +1,8 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
 import {
   LayoutDashboard,
   Folder,
@@ -12,7 +14,13 @@ import {
   Plus,
   Menu,
   X,
+  LogOut,
 } from "lucide-react";
+import { authService } from "@/services/auth.service";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import { clearSession } from "@/store/authSlice";
+import AppLoadingScreen from "@/components/common/AppLoadingScreen";
+import { MOCK_PROJECTS_EVENT, MockProject, readMockProjects } from "@/lib/mockProjects";
 
 interface SideBarDashboardWrapperProps {
   children: React.ReactNode;
@@ -47,6 +55,14 @@ const SideBarDashboardWrapper = ({
 }: SideBarDashboardWrapperProps) => {
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [loggingOut, setLoggingOut] = useState(false);
+  const [projectsLoading, setProjectsLoading] = useState(true);
+  const [projects, setProjects] = useState<MockProject[]>([]);
+  const router = useRouter();
+  const dispatch = useAppDispatch();
+  const user = useAppSelector((state) => state.auth.user);
+  const accessToken = useAppSelector((state) => state.auth.accessToken);
+  const refreshToken = useAppSelector((state) => state.auth.refreshToken);
 
   // Close mobile sidebar on window resize if screen becomes large
   useEffect(() => {
@@ -59,8 +75,58 @@ const SideBarDashboardWrapper = ({
     return () => window.removeEventListener("resize", handleResize);
   }, [mobileOpen]);
 
+  useEffect(() => {
+    if (!user || !accessToken) {
+      router.replace("/login");
+      return;
+    }
+
+    if (!user.onboardingDone) {
+      router.replace("/onboard");
+    }
+  }, [accessToken, router, user]);
+
+  useEffect(() => {
+    const syncProjects = () => {
+      setProjectsLoading(true);
+      window.setTimeout(() => {
+        setProjects(readMockProjects());
+        setProjectsLoading(false);
+      }, 450);
+    };
+
+    syncProjects();
+    window.addEventListener(MOCK_PROJECTS_EVENT, syncProjects);
+    window.addEventListener("storage", syncProjects);
+    return () => {
+      window.removeEventListener(MOCK_PROJECTS_EVENT, syncProjects);
+      window.removeEventListener("storage", syncProjects);
+    };
+  }, []);
+
+  const handleLogout = async () => {
+    try {
+      setLoggingOut(true);
+      if (refreshToken) {
+        await authService.logout(refreshToken);
+      }
+    } catch {
+      // Always clear local session even when server logout fails.
+    } finally {
+      dispatch(clearSession());
+      router.replace("/login");
+      setLoggingOut(false);
+    }
+  };
+
+  if (!user || !accessToken) {
+    return <AppLoadingScreen label="Checking session..." />;
+  }
+
   return (
     <div className="flex h-screen overflow-hidden bg-background">
+      {loggingOut && <AppLoadingScreen label="Signing out..." />}
+
       {/* MOBILE OVERLAY */}
       {mobileOpen && (
         <div
@@ -146,6 +212,10 @@ const SideBarDashboardWrapper = ({
 
           {/* NEW PROJECT BUTTON */}
           <button
+            onClick={() => {
+              setMobileOpen(false);
+              router.push("/dashboard");
+            }}
             className={`mt-6 h-14 rounded-2xl bg-gradient-to-br from-primary to-primary/80 text-white font-semibold shadow-xl hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 flex items-center justify-center gap-3 ${
               collapsed ? "w-14 mx-auto" : "w-full"
             }`}
@@ -193,6 +263,45 @@ const SideBarDashboardWrapper = ({
             );
           })}
 
+          {!collapsed && (
+            <div className="mt-4 rounded-2xl border border-border bg-background p-3">
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="text-xs font-bold tracking-wide text-muted-foreground uppercase">
+                  Created Projects
+                </h3>
+                <span className="text-xs text-muted-foreground">{projects.length}</span>
+              </div>
+
+              {projectsLoading ? (
+                <div className="space-y-2">
+                  {Array.from({ length: 3 }).map((_, idx) => (
+                    <div
+                      key={idx}
+                      className="h-10 rounded-xl bg-border animate-pulse"
+                    />
+                  ))}
+                </div>
+              ) : projects.length === 0 ? (
+                <p className="text-xs text-muted-foreground p-2">
+                  No projects yet. Create one from New Project.
+                </p>
+              ) : (
+                <div className="space-y-2">
+                  {projects.slice(0, 6).map((project) => (
+                    <Link
+                      key={project.id}
+                      href={`/dashboard/chat/${project.id}`}
+                      className="block rounded-xl border border-border px-3 py-2 hover:border-primary transition-colors"
+                    >
+                      <p className="text-sm font-semibold text-foreground truncate">{project.title}</p>
+                      <p className="text-xs text-muted-foreground truncate">{project.status}</p>
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
           {/* DIVIDER */}
           <div className="pt-5">
             <div className="border-t border-border" />
@@ -225,24 +334,41 @@ const SideBarDashboardWrapper = ({
 
         {/* USER */}
         <div className="relative z-10 p-4 border-t border-border shrink-0">
-          <div
-            className={`rounded-2xl border border-border bg-background p-4 flex items-center gap-3 transition-all duration-300 ${
-              collapsed ? "justify-center" : ""
-            }`}
-          >
-            {/* AVATAR */}
-            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center text-white font-bold shadow-lg shrink-0">
-              B
+          <div className="space-y-3">
+            <div
+              className={`rounded-2xl border border-border bg-background p-4 flex items-center gap-3 transition-all duration-300 ${
+                collapsed ? "justify-center" : ""
+              }`}
+            >
+              {/* AVATAR */}
+              <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center text-white font-bold shadow-lg shrink-0">
+                {(user.name?.[0] ?? user.email[0] ?? "U").toUpperCase()}
+              </div>
+
+              {!collapsed && (
+                <div className="flex-1 min-w-0">
+                  <h4 className="font-bold text-foreground truncate">
+                    {user.name ?? "Direction User"}
+                  </h4>
+                  <p className="text-sm text-muted-foreground truncate">
+                    {user.email}
+                  </p>
+                </div>
+              )}
             </div>
 
+            <button
+              onClick={handleLogout}
+              className={`w-full h-12 rounded-2xl border border-border bg-background hover:border-primary transition-all duration-300 flex items-center ${
+                collapsed ? "justify-center" : "justify-center gap-3"
+              } text-muted-foreground hover:text-primary font-semibold`}
+            >
+              <LogOut size={18} />
+              {!collapsed && <span>Logout</span>}
+            </button>
             {!collapsed && (
-              <div className="flex-1 min-w-0">
-                <h4 className="font-bold text-foreground truncate">
-                  Brijesh V.
-                </h4>
-                <p className="text-sm text-muted-foreground">
-                  Pro Plan
-                </p>
+              <div className="text-xs text-muted-foreground px-1">
+                {user.onboardingStage ?? "Workspace member"}
               </div>
             )}
           </div>

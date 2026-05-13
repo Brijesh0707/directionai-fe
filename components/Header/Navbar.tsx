@@ -2,7 +2,9 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Menu, X, Play } from "lucide-react";
+import { useAppSelector } from "@/store/hooks";
 
 const navItems = [
   { name: "Features", href: "#" },
@@ -14,13 +16,25 @@ const navItems = [
 
 const Navbar = () => {
   const [mobileMenu, setMobileMenu] = useState(false);
+  const router = useRouter();
+  const user = useAppSelector((state) => state.auth.user);
+  const accessToken = useAppSelector((state) => state.auth.accessToken);
+  const isLoggedIn = Boolean(user && accessToken);
+
+  const handleProfileClick = () => {
+    if (!user) {
+      router.push("/login");
+      return;
+    }
+    router.push(user.onboardingDone ? "/dashboard" : "/onboard");
+  };
 
   return (
     <header className="w-full sticky top-0 z-50 px-3 sm:px-5 pt-3">
       <nav className="glass-card rounded-2xl border border-border px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between shadow-sm">
         
         {/* LEFT */}
-        <div className="flex items-center gap-3">
+        <Link href="/" className="flex items-center gap-3">
           <div className="w-9 h-9 rounded-xl gradient-primary flex items-center justify-center shadow-md">
             <Play
               size={16}
@@ -31,7 +45,7 @@ const Navbar = () => {
           <h1 className="text-lg sm:text-xl font-semibold tracking-tight text-foreground">
             Direction AI
           </h1>
-        </div>
+        </Link>
 
         {/* DESKTOP NAV */}
         <div className="hidden lg:flex items-center gap-10">
@@ -48,9 +62,21 @@ const Navbar = () => {
 
         {/* RIGHT */}
         <div className="hidden lg:flex items-center">
-          <button className="gradient-primary text-white px-6 py-3 rounded-xl text-sm font-semibold shadow-lg hover:scale-[1.03] active:scale-[0.98] transition-all duration-200">
-            Start Building
-          </button>
+          {isLoggedIn ? (
+            <button
+              onClick={handleProfileClick}
+              className="h-11 px-4 rounded-xl border border-border bg-card text-foreground text-sm font-semibold shadow-sm hover:border-primary transition-all duration-200 flex items-center gap-3"
+            >
+              <span className="w-8 h-8 rounded-lg gradient-primary text-white flex items-center justify-center font-bold text-xs">
+                {(user?.name?.[0] ?? user?.email?.[0] ?? "U").toUpperCase()}
+              </span>
+              <span className="max-w-[160px] truncate">{user?.name ?? user?.email}</span>
+            </button>
+          ) : (
+            <Link href="/login" className="gradient-primary text-white px-6 py-3 rounded-xl text-sm font-semibold shadow-lg hover:scale-[1.03] active:scale-[0.98] transition-all duration-200">
+              Start Building
+            </Link>
+          )}
         </div>
 
         {/* MOBILE BUTTON */}
@@ -76,9 +102,21 @@ const Navbar = () => {
               </Link>
             ))}
 
-            <button className="gradient-primary text-white mt-3 h-12 rounded-xl text-sm font-semibold shadow-md">
-              Start Building
-            </button>
+            {isLoggedIn ? (
+              <button
+                onClick={() => {
+                  setMobileMenu(false);
+                  handleProfileClick();
+                }}
+                className="mt-3 h-12 rounded-xl text-sm font-semibold shadow-md border border-border bg-card text-foreground flex items-center justify-center"
+              >
+                Profile
+              </button>
+            ) : (
+              <Link href="/login" className="gradient-primary text-white mt-3 h-12 rounded-xl text-sm font-semibold shadow-md flex items-center justify-center">
+                Start Building
+              </Link>
+            )}
           </div>
         </div>
       )}

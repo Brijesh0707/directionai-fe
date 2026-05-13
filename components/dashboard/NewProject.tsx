@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import {
   Sparkles,
   Paperclip,
@@ -14,31 +15,38 @@ import {
   CreditCard,
   ChevronDown,
 } from "lucide-react";
+import {
+  MOCK_PROJECTS_EVENT,
+  MockProject,
+  createMockProject,
+  readMockProjects,
+  writeMockProjects,
+} from "@/lib/mockProjects";
 
-const projects = [
+const defaultProjects = [
   {
+    id: "seed_1",
     title: "Swiftflow SaaS",
-    description:
-      "Workflow automation platform for remote-first creative teams.",
+    idea: "Workflow automation platform for remote-first creative teams.",
     status: "In Progress",
     progress: 65,
-    icon: Rocket,
+    createdAt: new Date().toISOString(),
   },
   {
+    id: "seed_2",
     title: "GreenRoot AI",
-    description:
-      "AI-driven crop yield optimization for vertical indoor farming.",
+    idea: "AI-driven crop yield optimization for vertical indoor farming.",
     status: "Research",
     progress: 30,
-    icon: Compass,
+    createdAt: new Date().toISOString(),
   },
   {
+    id: "seed_3",
     title: "PayPulse Fintech",
-    description:
-      "Real-time cross-border payment reconciliation for e-commerce.",
+    idea: "Real-time cross-border payment reconciliation for e-commerce.",
     status: "Planning",
     progress: 15,
-    icon: CreditCard,
+    createdAt: new Date().toISOString(),
   },
 ];
 
@@ -59,9 +67,65 @@ const actions = [
 
 const NewProject = () => {
   const [idea, setIdea] = useState("");
+  const [generating, setGenerating] = useState(false);
+  const [savedProjects, setSavedProjects] = useState<MockProject[]>([]);
+  const router = useRouter();
+
+  useEffect(() => {
+    const syncProjects = () => {
+      setSavedProjects(readMockProjects());
+    };
+
+    syncProjects();
+    window.addEventListener(MOCK_PROJECTS_EVENT, syncProjects);
+    window.addEventListener("storage", syncProjects);
+    return () => {
+      window.removeEventListener(MOCK_PROJECTS_EVENT, syncProjects);
+      window.removeEventListener("storage", syncProjects);
+    };
+  }, []);
+
+  const projects = useMemo(() => {
+    const mappedDefaults: MockProject[] = defaultProjects.map((project) => ({
+      id: project.id,
+      title: project.title,
+      idea: project.idea,
+      status: project.status as MockProject["status"],
+      progress: project.progress,
+      createdAt: project.createdAt,
+    }));
+
+    return [...savedProjects, ...mappedDefaults];
+  }, [savedProjects]);
+
+  const handleGenerate = () => {
+    if (!idea.trim()) return;
+    const nextProject = createMockProject(idea);
+    const nextProjects = [nextProject, ...savedProjects];
+    writeMockProjects(nextProjects);
+    setGenerating(true);
+
+    window.setTimeout(() => {
+      router.push(`/dashboard/chat/${nextProject.id}`);
+    }, 1800);
+  };
 
   return (
     <section className="relative min-h-screen bg-background overflow-hidden">
+      {generating && (
+        <div className="fixed inset-0 z-[100] bg-black/45 backdrop-blur-xl flex items-center justify-center px-4">
+          <div className="w-full max-w-md rounded-[32px] border border-white/20 bg-black/70 p-8 text-white shadow-2xl">
+            <div className="mx-auto relative w-16 h-16">
+              <div className="absolute inset-0 rounded-full border border-white/20" />
+              <div className="absolute inset-0 rounded-full border-2 border-white/10 border-t-white animate-spin" />
+            </div>
+            <h3 className="mt-6 text-2xl font-semibold text-center">Building Your Strategy</h3>
+            <p className="mt-3 text-center text-white/75">
+              Drafting your execution plan and opening your project workspace.
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* BACKGROUND GLOWS */}
       <div className="absolute top-0 left-0 w-72 h-72 bg-primary/10 blur-3xl rounded-full" />
@@ -147,7 +211,11 @@ const NewProject = () => {
               </div>
 
               {/* BUTTON */}
-              <button className="group h-14 px-7 rounded-2xl gradient-primary text-white font-semibold shadow-xl hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 flex items-center justify-center gap-3">
+              <button
+                onClick={handleGenerate}
+                className="group h-14 px-7 rounded-2xl gradient-primary text-white font-semibold shadow-xl hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 flex items-center justify-center gap-3 disabled:opacity-60 disabled:cursor-not-allowed"
+                disabled={generating || !idea.trim()}
+              >
 
                 Generate Strategy
 
@@ -210,11 +278,12 @@ const NewProject = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
 
             {projects.map((project, index) => {
-              const Icon = project.icon;
+              const icons = [Rocket, Compass, CreditCard];
+              const Icon = icons[index % icons.length];
 
               return (
                 <div
-                  key={index}
+                  key={project.id}
                   className="group relative rounded-[30px] border border-border bg-card/80 backdrop-blur-xl p-6 overflow-hidden transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl hover:border-primary/30"
                 >
 
@@ -248,7 +317,7 @@ const NewProject = () => {
 
                     {/* DESCRIPTION */}
                     <p className="mt-4 text-base leading-8 text-muted-foreground">
-                      {project.description}
+                      {project.idea}
                     </p>
 
                     {/* PROGRESS */}

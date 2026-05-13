@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import Link from "next/link";
 import {
   PlayCircle,
   Sparkles,
@@ -54,9 +55,9 @@ const Hero = () => {
             {/* BUTTONS */}
             <div className="mt-10 flex flex-col sm:flex-row items-start sm:items-center gap-4">
 
-              <button className="gradient-primary text-white h-14 px-8 rounded-2xl font-semibold shadow-lg hover:scale-[1.03] active:scale-[0.98] transition-all duration-200">
+              <Link href="/login" className="gradient-primary text-white h-14 px-8 rounded-2xl font-semibold shadow-lg hover:scale-[1.03] active:scale-[0.98] transition-all duration-200 inline-flex items-center">
                 Start Building
-              </button>
+              </Link>
 
               <button className="h-14 px-7 rounded-2xl border border-border bg-card text-foreground font-semibold flex items-center gap-3 hover:border-primary hover:text-primary transition-all duration-200 shadow-sm">
                 <PlayCircle size={22} />

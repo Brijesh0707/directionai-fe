@@ -402,7 +402,7 @@ const SideBarDashboardWrapper = ({
 
         {/* PAGE CONTENT - Scrolls naturally */}
         <main className="flex-1">
-          <div className="p-6 lg:p-8">
+          <div className="">
             {children}
           </div>
         </main>

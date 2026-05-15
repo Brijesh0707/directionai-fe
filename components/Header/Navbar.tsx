@@ -2,8 +2,9 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { Menu, X, Play } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import { useAppSelector } from "@/store/hooks";
 
 const navItems = [
@@ -35,12 +36,7 @@ const Navbar = () => {
         
         {/* LEFT */}
         <Link href="/" className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl gradient-primary flex items-center justify-center shadow-md">
-            <Play
-              size={16}
-              className="text-white fill-white ml-[2px]"
-            />
-          </div>
+          <Image src="/LOGO.png" alt="Direction AI logo" width={36} height={36} className="rounded-xl object-cover shadow-md" />
 
           <h1 className="text-lg sm:text-xl font-semibold tracking-tight text-foreground">
             Direction AI

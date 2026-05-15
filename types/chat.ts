@@ -47,3 +47,18 @@ export type ChatReport = {
   hasJson: boolean;
   createdAt: string;
 };
+
+export type ChatSessionSummary = {
+  id: string;
+  title: string;
+  description: string;
+  createdAt: string;
+};
+
+export type ChatSessionSummaryResponse = {
+  items: ChatSessionSummary[];
+  page: number;
+  limit: number;
+  total: number;
+  hasMore: boolean;
+};

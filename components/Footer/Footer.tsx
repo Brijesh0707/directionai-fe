@@ -2,8 +2,8 @@
 
 import React from "react";
 import Link from "next/link";
+import Image from "next/image";
 import {
-  Play,
   Globe,
   AtSign,
   Share2,
@@ -20,13 +20,7 @@ const Footer = () => {
           {/* BRAND */}
           <div className="space-y-6">
             <div className="flex items-center gap-3">
-              
-              <div className="w-10 h-10 rounded-xl gradient-primary flex items-center justify-center shadow-md">
-                <Play
-                  size={16}
-                  className="text-white fill-white ml-[2px]"
-                />
-              </div>
+              <Image src="/LOGO.png" alt="Direction AI logo" width={40} height={40} className="rounded-xl object-cover shadow-md" />
 
               <h2 className="text-xl font-bold tracking-tight text-primary">
                 Direction AI

@@ -185,3 +185,7 @@ export default function PptJsonViewer({ payload }: { payload: unknown }) {
   );
 }
 
+export function getPptTheme(payload: unknown): ThemeSpec | null {
+  const renderMap = extractRenderMap(payload);
+  return renderMap?.theme ?? null;
+}

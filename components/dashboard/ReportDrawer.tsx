@@ -1,9 +1,9 @@
 "use client";
 
 import React from "react";
-import { Download, X } from "lucide-react";
+import { Printer, X } from "lucide-react";
 import { ChatReport } from "@/types/chat";
-import PptJsonViewer from "./PptJsonViewer";
+import AgentReportRenderer from "./AgentReportRenderer";
 
 type ReportDrawerProps = {
   isOpen: boolean;
@@ -11,7 +11,6 @@ type ReportDrawerProps = {
   activeReport: ChatReport | null;
   activeRunData: unknown;
   onClose: () => void;
-  onDownload: (runId: string, reportName?: string | null) => Promise<void>;
 };
 
 const ReportDrawer = ({
@@ -20,9 +19,39 @@ const ReportDrawer = ({
   activeReport,
   activeRunData,
   onClose,
-  onDownload,
 }: ReportDrawerProps) => {
   if (!isOpen) return null;
+
+  const handlePrint = () => {
+    const html = document.getElementById("agent-report-print-root")?.innerHTML;
+    if (!html) return;
+
+    const popup = window.open("", "_blank", "width=1200,height=900");
+    if (!popup) return;
+
+    popup.document.write(`
+      <html>
+        <head>
+          <title>Agent Report</title>
+          <style>
+            body { font-family: Arial, sans-serif; margin: 24px; color: #111827; }
+            h1, h2, h3, h4 { margin: 0 0 8px; }
+            p { margin: 0 0 10px; line-height: 1.55; }
+            pre { white-space: pre-wrap; word-break: break-word; }
+            .rounded-xl, .rounded-2xl, .rounded-lg { border-radius: 8px; }
+            .border { border: 1px solid #e5e7eb; }
+            .bg-white, .bg-gray-50 { background: #fff; }
+            .p-3, .p-4 { padding: 12px; }
+            .mb-3 { margin-bottom: 12px; }
+          </style>
+        </head>
+        <body>${html}</body>
+      </html>
+    `);
+    popup.document.close();
+    popup.focus();
+    popup.print();
+  };
 
   return (
     <div className="fixed inset-0 z-[120]">
@@ -53,27 +82,16 @@ const ReportDrawer = ({
         </div>
 
         <div className="mt-5 flex gap-3">
-          {activeReport?.hasDownload && (
-            <button
-              onClick={() => void onDownload(activeReport.runId, activeReport.reportName)}
-              className="h-11 px-4 rounded-xl gradient-primary text-white text-sm flex items-center gap-2"
-            >
-              <Download size={14} /> Download PPT
-            </button>
-          )}
+          <button
+            onClick={handlePrint}
+            className="h-11 px-4 rounded-xl border border-border bg-background text-foreground text-sm flex items-center gap-2"
+          >
+            <Printer size={14} /> Print / Save PDF
+          </button>
         </div>
 
-        <div className="mt-6">
-          {activeReport?.agentType === "PPT" && (
-            <div className="rounded-2xl border border-border bg-background/80 p-3">
-              <PptJsonViewer payload={activeRunData} />
-            </div>
-          )}
-          {activeReport?.agentType !== "PPT" && (
-            <pre className="text-xs leading-6 text-foreground whitespace-pre-wrap break-words rounded-2xl border border-border bg-background/70 p-4 max-h-[70vh] overflow-auto">
-              {JSON.stringify(activeRunData, null, 2)}
-            </pre>
-          )}
+        <div id="agent-report-print-root" className="mt-6">
+          <AgentReportRenderer agentType={activeReport?.agentType} payload={activeRunData} />
         </div>
       </aside>
     </div>

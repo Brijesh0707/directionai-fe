@@ -7,11 +7,11 @@ import { Menu, X, Play } from "lucide-react";
 import { useAppSelector } from "@/store/hooks";
 
 const navItems = [
-  { name: "Features", href: "#" },
-  { name: "Templates", href: "#" },
-  { name: "Marketplace", href: "#" },
-  { name: "Pricing", href: "#" },
-  { name: "Resources", href: "#" },
+  { name: "Features", href: "/#features" },
+  { name: "Pricing", href: "/#pricing" },
+  { name: "Privacy", href: "/privacy-policy" },
+  { name: "Terms", href: "/terms-and-conditions" },
+  { name: "Dashboard", href: "/dashboard" },
 ];
 
 const Navbar = () => {

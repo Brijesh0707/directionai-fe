@@ -47,31 +47,31 @@ const Footer = () => {
 
             <div className="flex flex-col gap-4">
               <Link
-                href="#"
+                href="/#features"
                 className="text-muted-foreground hover:text-primary transition-colors text-base"
               >
                 Features
               </Link>
 
               <Link
-                href="#"
-                className="text-muted-foreground hover:text-primary transition-colors text-base"
-              >
-                Marketplace
-              </Link>
-
-              <Link
-                href="#"
+                href="/#pricing"
                 className="text-muted-foreground hover:text-primary transition-colors text-base"
               >
                 Pricing
               </Link>
 
               <Link
-                href="#"
+                href="/dashboard"
                 className="text-muted-foreground hover:text-primary transition-colors text-base"
               >
-                Templates
+                Dashboard
+              </Link>
+
+              <Link
+                href="/dashboard/settings"
+                className="text-muted-foreground hover:text-primary transition-colors text-base"
+              >
+                Settings
               </Link>
             </div>
           </div>
@@ -84,31 +84,31 @@ const Footer = () => {
 
             <div className="flex flex-col gap-4">
               <Link
-                href="#"
+                href="/privacy-policy"
                 className="text-muted-foreground hover:text-primary transition-colors text-base"
               >
-                Documentation
+                Privacy Policy
               </Link>
 
               <Link
-                href="#"
+                href="/terms-and-conditions"
                 className="text-muted-foreground hover:text-primary transition-colors text-base"
               >
-                API Reference
+                Terms & Conditions
               </Link>
 
               <Link
-                href="#"
+                href="/dashboard"
                 className="text-muted-foreground hover:text-primary transition-colors text-base"
               >
-                Startup Guide
+                Start Building
               </Link>
 
               <Link
-                href="#"
+                href="/login"
                 className="text-muted-foreground hover:text-primary transition-colors text-base"
               >
-                Status
+                Login
               </Link>
             </div>
           </div>
@@ -121,24 +121,24 @@ const Footer = () => {
 
             <div className="flex flex-col gap-4">
               <Link
-                href="#"
+                href="/privacy-policy"
                 className="text-muted-foreground hover:text-primary transition-colors text-base"
               >
                 Privacy Policy
               </Link>
 
               <Link
-                href="#"
+                href="/terms-and-conditions"
                 className="text-muted-foreground hover:text-primary transition-colors text-base"
               >
                 Terms of Service
               </Link>
 
               <Link
-                href="#"
+                href="/dashboard/settings"
                 className="text-muted-foreground hover:text-primary transition-colors text-base"
               >
-                Security
+                Settings
               </Link>
             </div>
           </div>

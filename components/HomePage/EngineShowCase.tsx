@@ -10,7 +10,7 @@ import {
 
 const EngineShowCase = () => {
   return (
-    <section className="relative py-20 sm:py-24 lg:py-32 overflow-hidden">
+    <section id="features" className="relative py-20 sm:py-24 lg:py-32 overflow-hidden">
 
       {/* BACKGROUND EFFECT */}
       <div className="absolute top-0 left-0 w-72 h-72 bg-primary/10 blur-3xl rounded-full" />

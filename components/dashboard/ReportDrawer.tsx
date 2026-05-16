@@ -22,36 +22,105 @@ const ReportDrawer = ({
 }: ReportDrawerProps) => {
   if (!isOpen) return null;
 
-  const handlePrint = () => {
-    const html = document.getElementById("agent-report-print-root")?.innerHTML;
-    if (!html) return;
+const handlePrint = () => {
+  const content = document.getElementById("agent-report-print-root");
 
-    const popup = window.open("", "_blank", "width=1200,height=900");
-    if (!popup) return;
+  if (!content) return;
 
-    popup.document.write(`
-      <html>
-        <head>
-          <title>Agent Report</title>
-          <style>
-            body { font-family: Arial, sans-serif; margin: 24px; color: #111827; }
-            h1, h2, h3, h4 { margin: 0 0 8px; }
-            p { margin: 0 0 10px; line-height: 1.55; }
-            pre { white-space: pre-wrap; word-break: break-word; }
-            .rounded-xl, .rounded-2xl, .rounded-lg { border-radius: 8px; }
-            .border { border: 1px solid #e5e7eb; }
-            .bg-white, .bg-gray-50 { background: #fff; }
-            .p-3, .p-4 { padding: 12px; }
-            .mb-3 { margin-bottom: 12px; }
-          </style>
-        </head>
-        <body>${html}</body>
-      </html>
-    `);
-    popup.document.close();
-    popup.focus();
-    popup.print();
-  };
+  const printWindow = window.open("", "_blank", "width=1400,height=1000");
+
+  if (!printWindow) return;
+
+  // Clone stylesheets from current app
+  const styles = Array.from(document.styleSheets)
+    .map((styleSheet) => {
+      try {
+        if (styleSheet.href) {
+          return `<link rel="stylesheet" href="${styleSheet.href}" />`;
+        }
+
+        const rules = Array.from(styleSheet.cssRules)
+          .map((rule) => rule.cssText)
+          .join("");
+
+        return `<style>${rules}</style>`;
+      } catch {
+        return "";
+      }
+    })
+    .join("\n");
+
+  printWindow.document.write(`
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <title>Agent Report</title>
+
+        ${styles}
+
+        <style>
+          html, body {
+            padding: 0;
+            margin: 0;
+            background: white;
+          }
+
+          body {
+            padding: 24px;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+          }
+
+          @page {
+            size: A4;
+            margin: 16mm;
+          }
+
+          * {
+            box-sizing: border-box;
+          }
+
+          .print\\:hidden {
+            display: none !important;
+          }
+
+          .shadow-lg,
+          .shadow-md,
+          .shadow-sm {
+            box-shadow: none !important;
+          }
+
+          .backdrop-blur-sm,
+          .backdrop-blur-md {
+            backdrop-filter: none !important;
+          }
+
+          .hover\\:shadow-lg:hover,
+          .hover\\:shadow-md:hover {
+            box-shadow: none !important;
+          }
+        </style>
+      </head>
+
+      <body>
+        <div id="print-root">
+          ${content.innerHTML}
+        </div>
+
+        <script>
+          window.onload = () => {
+            setTimeout(() => {
+              window.print();
+              window.close();
+            }, 300);
+          };
+        </script>
+      </body>
+    </html>
+  `);
+
+  printWindow.document.close();
+};
 
   return (
     <div className="fixed inset-0 z-[120]">

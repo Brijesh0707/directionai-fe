@@ -15,6 +15,7 @@ import {
   MessageSquare,
   Search,
   Settings,
+  FolderKanban,
 } from "lucide-react";
 import { authService } from "@/services/auth.service";
 import { chatService } from "@/services/chat.service";
@@ -294,6 +295,25 @@ const SideBarDashboardWrapper = ({ children }: SideBarDashboardWrapperProps) => 
           >
             <Plus size={16} className="shrink-0" />
             {!collapsed && <span>New Chat</span>}
+          </button>
+          <button
+            onClick={() => {
+              setMobileOpen(false);
+              router.push("/dashboard/projects");
+            }}
+            className={`
+              mt-2 h-10 rounded-lg border font-medium
+              transition-all duration-200 flex items-center justify-center gap-2 text-sm
+              w-full
+              ${
+                pathname.startsWith("/dashboard/projects")
+                  ? "border-[#0B04CF]/30 bg-[#0B04CF]/5 text-[#0B04CF]"
+                  : "border-gray-200 bg-white text-gray-700 hover:border-[#0B04CF]/40 hover:text-[#0B04CF]"
+              }
+            `}
+          >
+            <FolderKanban size={16} className="shrink-0" />
+            {!collapsed && <span>Projects</span>}
           </button>
         </div>
 

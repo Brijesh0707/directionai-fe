@@ -1,4 +1,13 @@
-import NavAndFooterWrapper from "@/providers/NavAndFooterWrapper";
+import type { Metadata } from 'next';
+import NavAndFooterWrapper from '@/providers/NavAndFooterWrapper';
+import { createPageMetadata } from '../seo';
+
+export const metadata: Metadata = createPageMetadata({
+  title: 'Privacy Policy',
+  description:
+    'Read how Direction AI collects, uses, and protects your personal and workspace data.',
+  path: '/privacy-policy',
+});
 
 export default function PrivacyPolicyPage() {
   return (
@@ -33,4 +42,3 @@ export default function PrivacyPolicyPage() {
     </NavAndFooterWrapper>
   );
 }
-

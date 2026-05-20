@@ -132,11 +132,14 @@ const handlePrint = () => {
         aria-label="Close report drawer"
       />
       <aside
-        className={`absolute right-0 top-0 h-full w-[64vw] border-l border-border bg-card shadow-2xl p-6 overflow-y-auto transition-transform duration-300 ease-out ${
-          isVisible ? "translate-x-0" : "translate-x-full"
+        className={`absolute left-0 right-0 bottom-0 top-auto h-[100dvh] w-full border-t border-border bg-card shadow-2xl p-0 overflow-y-auto transition-transform duration-300 ease-out md:left-auto md:right-0 md:top-0 md:bottom-auto md:h-full md:w-[64vw] md:border-t-0 md:border-l md:p-6 ${
+          isVisible
+            ? "translate-y-0 md:translate-y-0 md:translate-x-0"
+            : "translate-y-full md:translate-y-0 md:translate-x-full"
         }`}
       >
-        <div className="flex items-start justify-between gap-4">
+        <div className="px-4 pt-4 md:px-0 md:pt-0">
+          <div className="flex items-start justify-between gap-4">
           <div>
             <p className="text-xs text-muted-foreground">Agent Report</p>
             <h3 className="text-xl font-bold text-foreground">{activeReport?.agentType || "Preview"}</h3>
@@ -158,9 +161,23 @@ const handlePrint = () => {
             <Printer size={14} /> Print / Save PDF
           </button>
         </div>
+        </div>
 
-        <div id="agent-report-print-root" className="mt-6">
-          <AgentReportRenderer agentType={activeReport?.agentType} payload={activeRunData} />
+        <div id="agent-report-print-root" className="mt-6 px-2 pb-4 md:px-0 md:pb-0">
+          <div className="md:hidden">
+            <div className="rounded-2xl border border-[#D8D5E2] bg-[#F6F6FB] p-3">
+              {/* FIXED: removed aspect-[16/10] and overflow-auto so content flows naturally on mobile */}
+              <div className="w-full rounded-xl border border-[#D8D5E2] bg-white shadow-sm overflow-visible">
+                <div className="p-3">
+                  <AgentReportRenderer agentType={activeReport?.agentType} payload={activeRunData} />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="hidden md:block">
+            <AgentReportRenderer agentType={activeReport?.agentType} payload={activeRunData} />
+          </div>
         </div>
       </aside>
     </div>

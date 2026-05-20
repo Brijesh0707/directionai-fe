@@ -9,6 +9,7 @@ export type AgentRun = {
   startedAt?: string | null;
   finishedAt?: string | null;
   resultJson?: unknown;
+  memorySummary?: string;
   errorMessage?: string | null;
   reportPath?: string | null;
   reportName?: string | null;

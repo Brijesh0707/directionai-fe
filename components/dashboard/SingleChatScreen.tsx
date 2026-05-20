@@ -5,6 +5,8 @@ import Image from "next/image";
 import {
   CheckSquare,
   ChevronRight,
+  ChevronDown,
+  ChevronUp,
   Eye,
   Loader2,
   FileText,
@@ -45,6 +47,49 @@ const options = [
   },
 ];
 
+const getMemorySummary = (resultJson: unknown): string | null => {
+  if (!resultJson || typeof resultJson !== "object" || Array.isArray(resultJson)) return null;
+  const summary = (resultJson as Record<string, unknown>).__memorySummary;
+  return typeof summary === "string" && summary.trim() ? summary : null;
+};
+
+const renderSummaryMarkdown = (summary: string) => {
+  const lines = summary
+    .split("\n")
+    .map((line) => line.trim())
+    .filter(Boolean);
+
+  return lines.map((line, idx) => {
+    if (line.startsWith("### ")) {
+      return (
+        <h4 key={idx} className="text-base font-semibold text-gray-900 mt-1 mb-2">
+          {line.replace(/^###\s+/, "")}
+        </h4>
+      );
+    }
+
+    if (line.startsWith("- ")) {
+      return (
+        <div key={idx} className="flex items-start gap-2">
+          <span className="mt-[8px] h-1.5 w-1.5 rounded-full bg-[#0B04CF] shrink-0" />
+          <p className="text-sm text-gray-700 leading-relaxed">{line.replace(/^-+\s+/, "")}</p>
+        </div>
+      );
+    }
+
+    return (
+      <p key={idx} className="text-sm text-gray-700 leading-relaxed">
+        {line}
+      </p>
+    );
+  });
+};
+
+const getCollapsedSummary = (summary: string, maxChars = 420): string => {
+  if (summary.length <= maxChars) return summary;
+  return `${summary.slice(0, maxChars).trimEnd()}...`;
+};
+
 const SingleChatScreen = ({ chatId }: { chatId: string }) => {
   const accessToken = useAppSelector((state) => state.auth.accessToken);
   const [loading, setLoading] = useState(true);
@@ -57,6 +102,7 @@ const SingleChatScreen = ({ chatId }: { chatId: string }) => {
   const [isDrawerVisible, setIsDrawerVisible] = useState(false);
   const [activeReport, setActiveReport] = useState<ChatReport | null>(null);
   const [activeRunData, setActiveRunData] = useState<unknown>(null);
+  const [expandedMemoryRuns, setExpandedMemoryRuns] = useState<Record<string, boolean>>({});
 
   const bottomRef = useRef<HTMLDivElement | null>(null);
   const scrollAreaRef = useRef<HTMLDivElement | null>(null);
@@ -176,6 +222,22 @@ const SingleChatScreen = ({ chatId }: { chatId: string }) => {
     setIsDrawerVisible(false);
     window.setTimeout(() => setIsDrawerOpen(false), 280);
   };
+
+  const toggleMemoryExpansion = (runId: string) => {
+    setExpandedMemoryRuns((prev) => ({ ...prev, [runId]: !prev[runId] }));
+  };
+
+  const memoryMessages = !project?.agentRuns?.length
+    ? []
+    : [...project.agentRuns]
+      .filter((run) => run.status === "completed")
+      .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime())
+      .map((run) => ({
+        runId: run.id,
+        agentType: run.agentType,
+        summary: getMemorySummary(run.resultJson),
+      }))
+      .filter((item) => Boolean(item.summary));
 
   if (loading) {
     return (
@@ -383,6 +445,61 @@ const SingleChatScreen = ({ chatId }: { chatId: string }) => {
                   </div>
                 )}
               </div>
+            </div>
+          )}
+
+          {/* Agent Memory */}
+          {memoryMessages.length > 0 && (
+            <div className="mb-5 space-y-4">
+              {memoryMessages.map((memory) => (
+                <div
+                  key={memory.runId}
+                  className="rounded-2xl border border-[#D8D5E2] bg-white shadow-sm overflow-hidden"
+                >
+                  <div className="border-b border-[#EAE8F3] px-5 py-4 flex items-center gap-3">
+                    <Image
+                      src="/LOGO.png"
+                      alt="Direction AI logo"
+                      width={30}
+                      height={30}
+                      className="rounded-lg object-cover"
+                    />
+                    <div>
+                      <h3 className="font-semibold text-gray-900 text-sm">Direction AI</h3>
+                      <p className="text-[11px] text-gray-400 mt-0.5">{memory.agentType} memory</p>
+                    </div>
+                  </div>
+                  <div className="px-5 py-4">
+                    <div className="space-y-2">
+                      {memory.summary
+                        ? renderSummaryMarkdown(
+                            expandedMemoryRuns[memory.runId]
+                              ? memory.summary
+                              : getCollapsedSummary(memory.summary),
+                          )
+                        : null}
+                    </div>
+                    {memory.summary && memory.summary.length > 420 ? (
+                      <button
+                        onClick={() => toggleMemoryExpansion(memory.runId)}
+                        className="mt-3 text-xs font-medium text-[#0B04CF] inline-flex items-center gap-1"
+                      >
+                        {expandedMemoryRuns[memory.runId] ? (
+                          <>
+                            <span>Show less</span>
+                            <ChevronUp size={13} />
+                          </>
+                        ) : (
+                          <>
+                            <span>Expand</span>
+                            <ChevronDown size={13} />
+                          </>
+                        )}
+                      </button>
+                    ) : null}
+                  </div>
+                </div>
+              ))}
             </div>
           )}
 

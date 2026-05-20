@@ -1,4 +1,12 @@
-import NavAndFooterWrapper from "@/providers/NavAndFooterWrapper";
+import type { Metadata } from 'next';
+import NavAndFooterWrapper from '@/providers/NavAndFooterWrapper';
+import { createPageMetadata } from '../seo';
+
+export const metadata: Metadata = createPageMetadata({
+  title: 'Terms and Conditions',
+  description: 'Review the terms and conditions for using Direction AI services and outputs.',
+  path: '/terms-and-conditions',
+});
 
 export default function TermsAndConditionsPage() {
   return (
@@ -33,4 +41,3 @@ export default function TermsAndConditionsPage() {
     </NavAndFooterWrapper>
   );
 }
-

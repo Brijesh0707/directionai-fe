@@ -79,7 +79,6 @@ import {
   PieChart,
   Presentation,
   Puzzle,
-  RectangleStack,
   Ruler,
   ShieldCheck,
   ShoppingBag,
@@ -111,11 +110,6 @@ import {
   Radio,
   Tv,
   Newspaper,
-  Twitter,
-  Linkedin,
-  Instagram,
-  Facebook,
-  Youtube,
   PenTool,
   Megaphone as MarketingMegaphone,
   ChartNoAxesCombined as Analytics,
@@ -137,7 +131,6 @@ import {
   MessageCircle,
   Bot,
   Languages,
-  TimeClock,
   Coins,
   ChartColumnIncreasing,
   ChartScatter,
@@ -146,7 +139,6 @@ import {
   Contact,
   CreditCard as Payment,
   Crosshair,
-  Cute,
   Cylinder,
   Earth,
   FolderSearch,
@@ -164,7 +156,6 @@ import {
   Images,
   Inbox,
   Infinity,
-  Info,
   InspectionPanel,
   Kanban,
   Key,
@@ -181,7 +172,6 @@ import {
   Magnet,
   Mailbox,
   MapPinned,
-  Medals,
   Megaphone as Announcement,
   Mic,
   Microscope,
@@ -235,13 +225,12 @@ import {
   Repeat2,
   Reply,
   ReplyAll,
-  Restore,
+  RotateCcw as Restore,
   Rewind,
   Ribbon,
   Rocket as Launch,
   Rows,
   Rss,
-  Ruler as Scale,
   Sailboat,
   Satellite,
   Save,
@@ -250,7 +239,7 @@ import {
   ScatterChart,
   School,
   Scissors,
-  Screenshot,
+  Camera as Screenshot,
   Scroll,
   Search as MagnifyingGlass,
   SearchCheck,
@@ -266,7 +255,7 @@ import {
   Shield as Security,
   Ship,
   Shirt,
-  Shoe,
+  Footprints as Shoe,
   ShoppingBag as Bag,
   ShoppingBasket,
   ShoppingCart as Cart,
@@ -297,7 +286,7 @@ import {
   SquareArrowOutUpLeft,
   SquareCode,
   SquareDot,
-  SquareGantt,
+  ChartGantt as SquareGantt,
   SquareMousePointer,
   SquareStack as StackIcon,
   SquareUser,
@@ -315,7 +304,7 @@ import {
   Store as Shop,
   StretchHorizontal,
   StretchVertical,
-  Stripe,
+  CreditCard as Stripe,
   Subscript,
   Sun,
   SunDim,
@@ -353,7 +342,7 @@ import {
   TowerControl,
   ToyBrick,
   Tractor,
-  Trademark,
+  Badge as Trademark,
   TrafficCone,
   Train,
   TramFront,
@@ -427,9 +416,8 @@ import {
   Wine,
   Wrench as Tool,
   X,
-  Youtube as YoutubeIcon,
   Zap as Lightning,
-  Zigzag,
+  Waypoints as Zigzag,
   ZoomIn,
   ZoomOut
 } from "lucide-react";
@@ -444,7 +432,7 @@ const asRecord = (value: unknown): Record<string, unknown> | null =>
 
 const asArray = (value: unknown): unknown[] => (Array.isArray(value) ? value : []);
 
-const pretty = (value: unknown) => {
+const pretty = (value: unknown): string => {
   if (typeof value === "string" || typeof value === "number") return String(value);
   if (Array.isArray(value)) return value.map((item) => pretty(item)).join(" • ");
   if (typeof value === "object" && value !== null) {
@@ -454,6 +442,11 @@ const pretty = (value: unknown) => {
   }
   return "";
 };
+
+const asStringArray = (value: unknown): string[] => asArray(value).map((item) => pretty(item)).filter(Boolean);
+
+const asStringRecord = (value: unknown): Record<string, string> =>
+  Object.fromEntries(Object.entries(asRecord(value) ?? {}).map(([key, item]) => [key, pretty(item)]));
 
 // Professional Status Badge
 const StatusBadge = ({ text, type }: { text: string; type?: "success" | "warning" | "info" | "default" | "purple" | "orange" | "blue" }) => {
@@ -541,10 +534,10 @@ const MarketingMetricCard = ({ label, value, icon: Icon, trend }: { label: strin
 // Marketing Platform Card
 const MarketingPlatformCard = ({ platform }: { platform: any }) => {
   const platformIcons: Record<string, React.ElementType> = {
-    "Facebook/Instagram": Facebook,
-    "LinkedIn": Linkedin,
+    "Facebook/Instagram": Share2,
+    "LinkedIn": Users,
     "Google Search/SEM": Search,
-    "YouTube": Youtube,
+    "YouTube": Video,
     "Local Business Directories/Forums": MapPin,
   };
   const Icon = platformIcons[platform.platform_name] || Megaphone;
@@ -808,16 +801,16 @@ const DevUIUXSuggestions = ({ data }: { data: Record<string, unknown> }) => (
           <Type size={16} className="text-[#0B04CF]" />
           <h5 className="text-sm font-semibold text-gray-900">Typography</h5>
         </div>
-        {data.typography_suggestion && typeof data.typography_suggestion === "object" && (
+        {asRecord(data.typography_suggestion) && (
           <div className="space-y-1">
-            <p className="text-sm"><span className="font-medium">Heading:</span> {(data.typography_suggestion as any).heading_font_style}</p>
-            <p className="text-sm"><span className="font-medium">Body:</span> {(data.typography_suggestion as any).body_font_style}</p>
+            <p className="text-sm"><span className="font-medium">Heading:</span> {pretty(asRecord(data.typography_suggestion)?.heading_font_style)}</p>
+            <p className="text-sm"><span className="font-medium">Body:</span> {pretty(asRecord(data.typography_suggestion)?.body_font_style)}</p>
           </div>
         )}
       </div>
     </div>
     
-    {data.color_palette && asArray(data.color_palette).length > 0 && (
+    {asArray(data.color_palette).length > 0 && (
       <div>
         <h5 className="text-sm font-semibold text-gray-900 mb-3 flex items-center gap-2">
           <Layers2 size={14} className="text-[#0B04CF]" />
@@ -838,21 +831,21 @@ const DevUIUXSuggestions = ({ data }: { data: Record<string, unknown> }) => (
       </div>
     )}
     
-    {data.ui_patterns && asArray(data.ui_patterns).length > 0 && (
+    {asStringArray(data.ui_patterns).length > 0 && (
       <div>
         <h5 className="text-sm font-semibold text-gray-900 mb-3 flex items-center gap-2">
           <Layout size={14} className="text-[#0B04CF]" />
           UI Patterns
         </h5>
         <div className="flex flex-wrap gap-2">
-          {asArray(data.ui_patterns).map((pattern: string, idx: number) => (
+          {asStringArray(data.ui_patterns).map((pattern, idx) => (
             <span key={idx} className="px-3 py-1.5 bg-gray-100 rounded-lg text-xs text-gray-700">{pattern}</span>
           ))}
         </div>
       </div>
     )}
     
-    {data.style_references && asArray(data.style_references).length > 0 && (
+    {asArray(data.style_references).length > 0 && (
       <div>
         <h5 className="text-sm font-semibold text-gray-900 mb-3 flex items-center gap-2">
           <Link size={14} className="text-[#0B04CF]" />
@@ -919,7 +912,7 @@ function renderMarketing(payload: Record<string, unknown>) {
           <div className="flex items-center gap-3">
             <div className="hidden md:flex items-center gap-2 bg-white/10 rounded-lg px-3 py-1.5">
               <Trophy size={14} className="text-yellow-300" />
-              <span className="text-xs font-medium">{finalSummary?.business_potential_score || "8.5/10"}</span>
+              <span className="text-xs font-medium">{pretty(finalSummary?.business_potential_score) || "8.5/10"}</span>
             </div>
           </div>
         </div>
@@ -981,7 +974,7 @@ function renderMarketing(payload: Record<string, unknown>) {
                   Primary Audience
                 </p>
                 <div className="flex flex-wrap gap-2">
-                  {asArray(targetAudience.primary_audience).map((audience: string, idx: number) => (
+                  {asStringArray(targetAudience.primary_audience).map((audience, idx) => (
                     <span key={idx} className="px-3 py-1.5 bg-gray-100 rounded-lg text-sm text-gray-700">{audience}</span>
                   ))}
                 </div>
@@ -992,7 +985,7 @@ function renderMarketing(payload: Record<string, unknown>) {
                   Secondary Audience
                 </p>
                 <div className="flex flex-wrap gap-2">
-                  {asArray(targetAudience.secondary_audience).map((audience: string, idx: number) => (
+                  {asStringArray(targetAudience.secondary_audience).map((audience, idx) => (
                     <span key={idx} className="px-3 py-1.5 bg-gray-100 rounded-lg text-sm text-gray-700">{audience}</span>
                   ))}
                 </div>
@@ -1062,7 +1055,7 @@ function renderMarketing(payload: Record<string, unknown>) {
             <div className="flex items-center gap-3 mb-3">
               <span className="text-xs font-medium text-gray-500">Priority Order:</span>
               <div className="flex flex-wrap gap-2">
-                {asArray(platformStrategy.platform_priority_order).map((platform: string, idx: number) => (
+                {asStringArray(platformStrategy.platform_priority_order).map((platform, idx) => (
                   <span key={idx} className="text-xs px-2 py-1 bg-gray-100 rounded-full text-gray-600">
                     {idx + 1}. {platform}
                   </span>
@@ -1113,7 +1106,7 @@ function renderMarketing(payload: Record<string, unknown>) {
                     <div>
                       <p className="text-xs font-medium text-gray-500 mb-2">Best Platforms</p>
                       <div className="flex flex-wrap gap-1.5">
-                        {asArray(data.best_platforms).map((platform: string, idx: number) => (
+                        {asStringArray(data.best_platforms).map((platform, idx) => (
                           <span key={idx} className="text-xs px-2 py-1 bg-gray-100 rounded-full">{platform}</span>
                         ))}
                       </div>
@@ -1242,7 +1235,7 @@ function renderDevelopment(payload: Record<string, unknown>) {
                   Target Users
                 </p>
                 <div className="flex flex-wrap gap-2">
-                  {asArray(projectUnderstanding.target_users).map((user: string, idx: number) => (
+                  {asStringArray(projectUnderstanding.target_users).map((user, idx) => (
                     <span key={idx} className="px-3 py-1.5 bg-gray-100 rounded-lg text-sm text-gray-700">{user}</span>
                   ))}
                 </div>
@@ -1285,22 +1278,22 @@ function renderDevelopment(payload: Record<string, unknown>) {
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-              {deliveryPlanning?.mvp_definition && (
+              {Boolean(deliveryPlanning?.mvp_definition) && (
                 <div className="rounded-lg border border-amber-200 bg-amber-50/20 p-4">
                   <div className="flex items-center gap-2 mb-2">
                     <Rocket size={16} className="text-amber-600" />
                     <h5 className="text-sm font-semibold text-amber-800">MVP Definition</h5>
                   </div>
-                  <p className="text-sm text-gray-700 leading-relaxed">{pretty(deliveryPlanning.mvp_definition)}</p>
+                  <p className="text-sm text-gray-700 leading-relaxed">{pretty(deliveryPlanning?.mvp_definition)}</p>
                 </div>
               )}
-              {deliveryPlanning?.final_release_definition && (
+              {Boolean(deliveryPlanning?.final_release_definition) && (
                 <div className="rounded-lg border border-emerald-200 bg-emerald-50/20 p-4">
                   <div className="flex items-center gap-2 mb-2">
                     <Award size={16} className="text-emerald-600" />
                     <h5 className="text-sm font-semibold text-emerald-800">Final Release Definition</h5>
                   </div>
-                  <p className="text-sm text-gray-700 leading-relaxed">{pretty(deliveryPlanning.final_release_definition)}</p>
+                  <p className="text-sm text-gray-700 leading-relaxed">{pretty(deliveryPlanning?.final_release_definition)}</p>
                 </div>
               )}
             </div>
@@ -1321,7 +1314,7 @@ function renderDevelopment(payload: Record<string, unknown>) {
                     <div className="flex items-center justify-between flex-wrap gap-2">
                       <div className="flex items-center gap-2">
                         <span className="text-xs font-bold text-[#0B04CF] bg-[#0B04CF]/10 px-2 py-1 rounded">Phase {phaseData.phase_id}</span>
-                        <h5 className="text-sm font-semibold text-gray-900">{phase?.phase_name || `Phase ${phaseData.phase_id}`}</h5>
+                        <h5 className="text-sm font-semibold text-gray-900">{pretty(asRecord(phase)?.phase_name) || `Phase ${phaseData.phase_id}`}</h5>
                       </div>
                       <span className="text-xs text-gray-500">{items.length} development items</span>
                     </div>
@@ -1346,10 +1339,10 @@ function renderDevelopment(payload: Record<string, unknown>) {
           <div className="space-y-5">
             <div>
               <h5 className="text-sm font-semibold text-gray-900 mb-3">Recommended Stack</h5>
-              <DevTechStackCard stack={asRecord(techStack.recommended_stack) || {}} />
+              <DevTechStackCard stack={asStringRecord(techStack.recommended_stack)} />
             </div>
             
-            {techStack.selection_reasoning && asArray(techStack.selection_reasoning).length > 0 && (
+            {asArray(techStack.selection_reasoning).length > 0 && (
               <div>
                 <h5 className="text-sm font-semibold text-gray-900 mb-3 flex items-center gap-2">
                   <Lightbulb size={14} className="text-[#0B04CF]" />
@@ -1384,7 +1377,7 @@ function renderDevelopment(payload: Record<string, unknown>) {
                   Build Order
                 </h5>
                 <div className="space-y-2">
-                  {asArray(finalSummary.build_order).map((phase: string, idx: number) => (
+                  {asStringArray(finalSummary.build_order).map((phase, idx) => (
                     <div key={idx} className="flex items-center gap-2 text-sm text-gray-700">
                       <div className="w-5 h-5 rounded-full bg-[#0B04CF]/10 text-[#0B04CF] flex items-center justify-center text-xs font-bold">{idx + 1}</div>
                       <span>{phase}</span>

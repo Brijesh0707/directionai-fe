@@ -1,5 +1,5 @@
 import api from './api';
-import { ChatReport, ChatSession, ChatSessionSummaryResponse } from '@/types/chat';
+import { ChatReport, ChatSession, ChatSessionSummaryResponse, ChatUsageResponse } from '@/types/chat';
 
 const baseURL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3000';
 
@@ -38,6 +38,11 @@ export const chatService = {
 
   async getRunResult(chatId: string, runId: string) {
     const { data } = await api.get(`/chat/sessions/${chatId}/runs/${runId}`);
+    return data;
+  },
+
+  async getUsage(chatId: string) {
+    const { data } = await api.get<ChatUsageResponse>(`/chat/sessions/${chatId}/usage`);
     return data;
   },
 

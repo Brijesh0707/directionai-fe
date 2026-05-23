@@ -8,27 +8,29 @@ import {
   Clock, Award, Eye, Brain, Cloud, Lock, Infinity, Share2, Heart, Database,
   Cpu, Network, Server, HardDrive, ArrowUpRight, MessageSquare, Star,
   ChevronDown, ChevronUp, ExternalLink, Activity, Lightbulb, BookOpen,
-  Search, Youtube, Twitter, Instagram, Hash, TrendingDown, Info
+  Search, PlayCircle, MessageCircle, Camera, Hash, TrendingDown, Info
 } from "lucide-react";
 
-// ─── THEME ───────────────────────────────────────────────────────────────────
+// ─── THEME (Direction AI Brand Colors) ───────────────────────────────────────
 const T = {
-  primary: "#1a0ea8",
-  secondary: "#2b1de8",
-  accent: "#6c47ff",
-  danger: "#c0392b",
+  primary: "var(--primary, #0B04CF)",
+  secondary: "var(--secondary, #1208E8)",
+  tertiary: "var(--tertiary, #800500)",
+  neutral: "var(--neutral, #777682)",
+  background: "var(--background, #F3F1F8)",
+  foreground: "var(--foreground, #171717)",
+  card: "var(--card, #ECEAF3)",
+  cardForeground: "var(--card-foreground, #1E1E2A)",
+  border: "var(--border, #D8D5E2)",
+  input: "var(--input, #E6E3EF)",
+  ring: "var(--ring, #0B04CF)",
+  muted: "var(--muted, #A2A0B3)",
+  mutedForeground: "var(--muted-foreground, #5F5D6B)",
   success: "#059669",
   warning: "#d97706",
   info: "#0284c7",
-  bg: "#f0eef8",
-  surface: "#ffffff",
-  surfaceAlt: "#f8f7fc",
-  border: "#e2dff0",
-  text: "#0f0e1a",
-  muted: "#5e5c75",
-  gradient: "linear-gradient(135deg,#1a0ea8 0%,#6c47ff 100%)",
-  gradientDanger: "linear-gradient(135deg,#c0392b 0%,#e74c3c 100%)",
-  gradientSuccess: "linear-gradient(135deg,#059669 0%,#10b981 100%)",
+  gradient: "linear-gradient(135deg, #0B04CF 0%, #1208E8 100%)",
+  gradientDanger: "linear-gradient(135deg, #800500 0%, #b30a00 100%)",
 };
 
 // ─── HELPERS ──────────────────────────────────────────────────────────────────
@@ -41,30 +43,30 @@ const pretty = (v: unknown): string => {
   return JSON.stringify(v, null, 2);
 };
 
-// ─── BASE COMPONENTS ─────────────────────────────────────────────────────────
-const Card = ({ children, className = "", style = {} }: any) => (
+// ─── BASE COMPONENTS WITH THEME ──────────────────────────────────────────────
+const Card = ({ children, className = "", style = {}, hover = false }: any) => (
   <div
-    className={`rounded-2xl border bg-white shadow-sm ${className}`}
-    style={{ borderColor: T.border, ...style }}
+    className={`rounded-xl border bg-card text-card-foreground shadow-sm ${hover ? "transition-all duration-200 hover:shadow-md hover:-translate-y-0.5" : ""} ${className}`}
+    style={{ borderColor: T.border, backgroundColor: T.card, ...style }}
   >
     {children}
   </div>
 );
 
 const SectionHeader = ({ title, icon: Icon, badge, subtitle }: any) => (
-  <div className="flex items-center justify-between mb-6">
+  <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
     <div className="flex items-center gap-3">
-      <div className="p-2.5 rounded-xl" style={{ background: T.gradient }}>
+      <div className="p-2.5 rounded-xl gradient-primary shadow-sm">
         <Icon className="h-5 w-5 text-white" />
       </div>
       <div>
-        <h2 className="text-xl font-bold" style={{ color: T.text, fontFamily: "'Georgia', serif" }}>{title}</h2>
-        {subtitle && <p className="text-xs mt-0.5" style={{ color: T.muted }}>{subtitle}</p>}
+        <h2 className="text-xl font-bold" style={{ color: T.foreground, fontFamily: "'Geist', 'Inter', sans-serif" }}>{title}</h2>
+        {subtitle && <p className="text-xs mt-0.5" style={{ color: T.mutedForeground }}>{subtitle}</p>}
       </div>
     </div>
     {badge && (
       <span className="px-3 py-1 text-xs font-semibold rounded-full border"
-        style={{ borderColor: T.border, color: T.muted, background: T.surfaceAlt }}>
+        style={{ borderColor: T.border, color: T.mutedForeground, background: T.input }}>
         {badge}
       </span>
     )}
@@ -73,7 +75,7 @@ const SectionHeader = ({ title, icon: Icon, badge, subtitle }: any) => (
 
 const Pill = ({ children, color = "gray" }: any) => {
   const map: Record<string, [string, string]> = {
-    gray: [T.surfaceAlt, T.muted],
+    gray: [T.input, T.mutedForeground],
     blue: ["#eff6ff", "#1d4ed8"],
     green: ["#f0fdf4", "#166534"],
     red: ["#fef2f2", "#991b1b"],
@@ -81,202 +83,149 @@ const Pill = ({ children, color = "gray" }: any) => {
     purple: ["#f5f3ff", "#5b21b6"],
   };
   const [bg, fg] = map[color] ?? map.gray;
-  return (
-    <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold"
-      style={{ background: bg, color: fg }}>{children}</span>
-  );
+  return <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold" style={{ background: bg, color: fg }}>{children}</span>;
 };
 
-// Collapsible section
 const Collapsible = ({ title, children, defaultOpen = false }: any) => {
   const [open, setOpen] = useState(defaultOpen);
   return (
     <div className="border rounded-xl overflow-hidden mb-3" style={{ borderColor: T.border }}>
       <button
         onClick={() => setOpen(!open)}
-        className="w-full flex items-center justify-between px-5 py-3.5 text-left font-semibold text-sm transition-colors hover:bg-gray-50"
-        style={{ color: T.text }}
+        className="w-full flex items-center justify-between px-5 py-3.5 text-left font-semibold text-sm transition-all hover:bg-muted/20"
+        style={{ color: T.foreground }}
       >
         {title}
-        {open ? <ChevronUp className="h-4 w-4" style={{ color: T.muted }} /> : <ChevronDown className="h-4 w-4" style={{ color: T.muted }} />}
+        {open ? <ChevronUp className="h-4 w-4" style={{ color: T.mutedForeground }} /> : <ChevronDown className="h-4 w-4" style={{ color: T.mutedForeground }} />}
       </button>
-      {open && <div className="px-5 pb-5 pt-1">{children}</div>}
+      {open && <div className="px-5 pb-5 pt-1 border-t" style={{ borderColor: T.border }}>{children}</div>}
     </div>
   );
 };
 
-// ─── EXECUTIVE SUMMARY ───────────────────────────────────────────────────────
-const ExecutiveSummary = ({ data }: { data: string }) => (
-  <Card className="p-6">
+// ─── HELPER TO EXTRACT DATA FROM RESPONSES ───────────────────────────────────
+const getSectionData = (responses: unknown[], sectionName: string): any => {
+  const section = responses.find((item: any) => item?.section === sectionName);
+  return section?.data?.data;
+};
+
+const getSectionAnswer = (responses: unknown[], sectionName: string): string => {
+  const data = getSectionData(responses, sectionName);
+  return data?.answer || "";
+};
+
+// ─── DYNAMIC RENDERERS - EVERYTHING FROM PAYLOAD ─────────────────────────────
+
+// Executive Summary
+const ExecutiveSummary = ({ mergedResponse }: { mergedResponse: string }) => (
+  <Card className="p-6" hover>
     <div className="prose prose-sm max-w-none">
-      {data.split("\n\n").map((para, i) => {
+      {mergedResponse.split("\n\n").map((para, i) => {
         if (para.startsWith("###")) {
-          return (
-            <h3 key={i} className="text-base font-bold mt-4 mb-2" style={{ color: T.primary }}>
-              {para.replace(/^#+\s*/, "")}
-            </h3>
-          );
+          return <h3 key={i} className="text-base font-bold mt-4 mb-2" style={{ color: T.primary }}>{para.replace(/^#+\s*/, "")}</h3>;
         }
         if (para.startsWith("####")) {
-          return (
-            <h4 key={i} className="text-sm font-semibold mt-3 mb-1" style={{ color: T.text }}>
-              {para.replace(/^#+\s*/, "")}
-            </h4>
-          );
+          return <h4 key={i} className="text-sm font-semibold mt-3 mb-1" style={{ color: T.foreground }}>{para.replace(/^#+\s*/, "")}</h4>;
         }
         if (para.startsWith("- ") || para.startsWith("* ")) {
           return (
             <ul key={i} className="space-y-1 my-2">
               {para.split("\n").map((line, j) => (
-                <li key={j} className="flex items-start gap-2 text-sm" style={{ color: T.muted }}>
-                  <span className="mt-1 w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: T.accent }} />
+                <li key={j} className="flex items-start gap-2 text-sm" style={{ color: T.mutedForeground }}>
+                  <span className="mt-1 w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: T.primary }} />
                   {line.replace(/^[-*]\s*/, "")}
                 </li>
               ))}
             </ul>
           );
         }
-        return (
-          <p key={i} className="text-sm leading-relaxed mb-3" style={{ color: T.muted }}>
-            {para}
-          </p>
-        );
+        return <p key={i} className="text-sm leading-relaxed mb-3" style={{ color: T.mutedForeground }}>{para}</p>;
       })}
     </div>
   </Card>
 );
 
-// ─── MARKET KPIs ─────────────────────────────────────────────────────────────
-const MarketKPIs = () => {
-  const kpis = [
-    { label: "Global Cloud Storage (2023)", value: "$98.8B", sub: "Base Year", icon: Globe, color: "#0284c7" },
-    { label: "Projected by 2033 (TAM)", value: "$777.6B", sub: "Allied Market Research", icon: TrendingUp, color: T.primary },
-    { label: "CAGR 2024–2033", value: "21.9%", sub: "Annual Growth Rate", icon: Activity, color: T.success },
-    { label: "Consumer Cloud SAM (2025)", value: "$25.5B", sub: "Growing to $134.8B by 2035", icon: Users, color: "#7c3aed" },
-    { label: "Consumer SAM CAGR", value: "18.1%", sub: "2026–2035 forecast", icon: BarChart3, color: T.warning },
-    { label: "N. America Market (2025)", value: "$74.8B", sub: "46.4% of global revenue", icon: Building, color: T.danger },
-  ];
+// Market KPIs
+const MarketKPIs = ({ responses }: { responses: unknown[] }) => {
+  const tamAnswer = getSectionAnswer(responses, "findTAM");
+  
+  const sentences = tamAnswer.split(/\.\s+/);
+  const kpis: { label: string; value: string; sub: string; icon: any }[] = [];
+  
+  sentences.forEach((sentence: string) => {
+    const dollarMatch = sentence.match(/\$(\d+(?:\.\d+)?)\s*(billion|million|trillion)/i);
+    const percentMatch = sentence.match(/(\d+(?:\.\d+)?)\s*percent/i);
+    const yearMatch = sentence.match(/(\d{4})/);
+    
+    if (dollarMatch && sentence.length > 15) {
+      const value = `$${dollarMatch[1]}${dollarMatch[2] === "billion" ? "B" : dollarMatch[2] === "million" ? "M" : ""}`;
+      let label = sentence.substring(0, 50);
+      if (label.length === 50) label += "...";
+      
+      kpis.push({
+        label: label,
+        value: value,
+        sub: yearMatch ? `Data from ${yearMatch[1]}` : "Market data",
+        icon: Globe
+      });
+    }
+    
+    if (percentMatch && sentence.includes("CAGR")) {
+      kpis.push({
+        label: sentence.substring(0, 45) + (sentence.length > 45 ? "..." : ""),
+        value: `${percentMatch[1]}%`,
+        sub: "Annual growth rate",
+        icon: TrendingUp
+      });
+    }
+  });
+  
+  const displayKpis = kpis.slice(0, 4);
+  
+  if (displayKpis.length === 0) {
+    return <Card className="p-8 text-center text-muted-foreground">{tamAnswer || "No market data available"}</Card>;
+  }
+  
   return (
-    <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-      {kpis.map((k, i) => (
-        <Card key={i} className="p-5 hover:shadow-md transition-shadow">
+    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      {displayKpis.map((k, i) => (
+        <Card key={i} className="p-5 transition-all duration-200 hover:shadow-md" hover>
           <div className="flex items-start justify-between mb-3">
-            <div className="p-2 rounded-lg" style={{ background: `${k.color}15` }}>
-              <k.icon className="h-4 w-4" style={{ color: k.color }} />
+            <div className="p-2 rounded-lg" style={{ background: `${T.primary}15` }}>
+              <k.icon className="h-4 w-4" style={{ color: T.primary }} />
             </div>
             <ArrowUpRight className="h-4 w-4" style={{ color: T.success }} />
           </div>
-          <p className="text-2xl font-bold mb-0.5" style={{ color: T.text, fontFamily: "'Georgia', serif" }}>{k.value}</p>
-          <p className="text-xs font-medium mb-1" style={{ color: T.text }}>{k.label}</p>
-          <p className="text-xs" style={{ color: T.muted }}>{k.sub}</p>
+          <p className="text-2xl font-bold mb-0.5" style={{ color: T.foreground }}>{k.value}</p>
+          <p className="text-xs leading-tight mb-1" style={{ color: T.foreground }}>{k.label}</p>
+          <p className="text-xs" style={{ color: T.mutedForeground }}>{k.sub}</p>
         </Card>
       ))}
     </div>
   );
 };
 
-// ─── TAM / SAM / SOM ─────────────────────────────────────────────────────────
-const TamSamSom = () => (
-  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-    {[
-      {
-        label: "TAM", title: "Total Addressable Market",
-        value: "$777.6B", by: "by 2033",
-        detail: "Global cloud storage market (all segments). CAGR: 21.9%.",
-        bar: "100%", color: T.primary,
-      },
-      {
-        label: "SAM", title: "Serviceable Available Market",
-        value: "$134.8B", by: "by 2035",
-        detail: "Consumer cloud storage services segment. CAGR: 18.1%. APAC leads at 36% share.",
-        bar: "60%", color: T.accent,
-      },
-      {
-        label: "SOM", title: "Serviceable Obtainable Market",
-        value: "2–5%", by: "of SAM",
-        detail: "Realistic early penetration for a niche digital-memory startup. ~$2–7B opportunity.",
-        bar: "15%", color: "#9333ea",
-      },
-    ].map((m) => (
-      <Card key={m.label} className="p-6 flex flex-col">
-        <div className="flex items-center justify-between mb-4">
-          <span className="text-3xl font-black" style={{ color: m.color, fontFamily: "'Georgia', serif" }}>{m.label}</span>
-          <span className="text-xs font-medium px-2 py-1 rounded-full" style={{ background: `${m.color}15`, color: m.color }}>{m.title}</span>
-        </div>
-        <p className="text-3xl font-bold mb-0.5" style={{ color: T.text }}>{m.value}</p>
-        <p className="text-sm mb-3" style={{ color: T.muted }}>{m.by}</p>
-        <div className="h-2 rounded-full mb-3" style={{ background: T.border }}>
-          <div className="h-full rounded-full transition-all" style={{ width: m.bar, background: m.color }} />
-        </div>
-        <p className="text-xs leading-relaxed" style={{ color: T.muted }}>{m.detail}</p>
-      </Card>
-    ))}
-  </div>
-);
-
-// ─── GROWTH TIMELINE ─────────────────────────────────────────────────────────
-const GrowthTimeline = () => {
-  const points = [
-    { year: "2023", value: "$98.8B", note: "Base" },
-    { year: "2025", value: "$161B", note: "Est." },
-    { year: "2026", value: "$197.8B", note: "Forecast" },
-    { year: "2031", value: "$380B", note: "Forecast" },
-    { year: "2033", value: "$777.6B", note: "Peak" },
-    { year: "2034", value: "$810B", note: "Proj." },
-  ];
-  return (
-    <Card className="p-6 mt-4">
-      <p className="text-sm font-semibold mb-4" style={{ color: T.text }}>Cloud Storage Market Growth Trajectory</p>
-      <div className="relative">
-        <div className="absolute top-3 left-0 right-0 h-0.5" style={{ background: T.border }} />
-        <div className="flex justify-between relative">
-          {points.map((p, i) => (
-            <div key={i} className="flex flex-col items-center">
-              <div className="w-3 h-3 rounded-full border-2 border-white shadow-sm z-10"
-                style={{ background: i === points.length - 1 ? T.primary : T.accent }} />
-              <p className="text-xs font-bold mt-2" style={{ color: T.text }}>{p.year}</p>
-              <p className="text-xs font-semibold" style={{ color: T.primary }}>{p.value}</p>
-              <p className="text-xs" style={{ color: T.muted }}>{p.note}</p>
-            </div>
-          ))}
-        </div>
-      </div>
-    </Card>
-  );
-};
-
-// ─── COMPETITORS ─────────────────────────────────────────────────────────────
-const CompetitorTable = () => {
-  const rows = [
-    { name: "Amazon AWS", mktCap: "$2.25T", share: "28%", products: "S3, EBS, Glacier", type: "Enterprise", durability: "11 nines", badge: "blue" },
-    { name: "Microsoft Azure", mktCap: "~$3T", share: "21%", products: "Azure Blob, OneDrive", type: "Enterprise+Consumer", durability: "11 nines", badge: "blue" },
-    { name: "Google Cloud", mktCap: "$3.77T", share: "14%", products: "GCS, Drive, One", type: "Enterprise+Consumer", durability: "11 nines", badge: "blue" },
-    { name: "Apple iCloud", mktCap: "$3.88T", share: "Consumer #1", products: "iCloud Drive, Photos", type: "Consumer", durability: "HA global", badge: "gray" },
-    { name: "Tencent Cloud", mktCap: "$591B", share: "Asia", products: "COS", type: "Enterprise Asia", durability: "99.995%", badge: "green" },
-    { name: "FOREVER.com", mktCap: "Private", share: "Niche", products: "Permanent Cloud Storage", type: "Consumer Legacy", durability: "Lifetime+100yr", badge: "purple" },
-    { name: "pCloud", mktCap: "Private", share: "Growing", products: "pCloud Business", type: "Consumer/SME", durability: "Standard", badge: "gray" },
-    { name: "Sync.com", mktCap: "Private", share: "Niche", products: "Sync Business Plans", type: "Privacy-focused SME", durability: "Standard", badge: "gray" },
-  ];
+// Competitor Table
+const CompetitorTable = ({ competitors }: { competitors: string[] }) => {
+  if (!competitors.length) return <Card className="p-8 text-center text-muted-foreground">No competitor data available</Card>;
+  
   return (
     <div className="overflow-x-auto">
       <table className="w-full text-sm border-collapse">
         <thead>
-          <tr style={{ background: T.surfaceAlt }}>
-            {["Provider", "Market Cap", "Est. Share", "Core Products", "Buyer Type", "Durability"].map((h) => (
-              <th key={h} className="text-left py-3 px-4 text-xs font-semibold border-b"
-                style={{ color: T.muted, borderColor: T.border }}>{h}</th>
-            ))}
+          <tr style={{ background: T.input }}>
+            <th className="text-left py-3 px-4 text-xs font-semibold border-b" style={{ color: T.mutedForeground, borderColor: T.border }}>Competitor</th>
+            <th className="text-left py-3 px-4 text-xs font-semibold border-b" style={{ color: T.mutedForeground, borderColor: T.border }}>Type</th>
           </tr>
         </thead>
         <tbody>
-          {rows.map((r, i) => (
-            <tr key={i} className="border-b hover:bg-gray-50 transition-colors" style={{ borderColor: T.border }}>
-              <td className="py-3 px-4 font-semibold" style={{ color: T.text }}>{r.name}</td>
-              <td className="py-3 px-4" style={{ color: T.muted }}>{r.mktCap}</td>
-              <td className="py-3 px-4"><Pill color={r.badge}>{r.share}</Pill></td>
-              <td className="py-3 px-4 text-xs" style={{ color: T.muted }}>{r.products}</td>
-              <td className="py-3 px-4 text-xs" style={{ color: T.muted }}>{r.type}</td>
-              <td className="py-3 px-4 text-xs" style={{ color: T.muted }}>{r.durability}</td>
+          {competitors.map((comp, i) => (
+            <tr key={i} className="border-b transition-colors hover:bg-muted/10" style={{ borderColor: T.border }}>
+              <td className="py-3 px-4 font-semibold" style={{ color: T.foreground }}>{comp}</td>
+              <td className="py-3 px-4 text-xs" style={{ color: T.mutedForeground }}>
+                {comp === "PitchBook" ? "Data Platform" : comp === "Crunchbase" ? "Data Platform" : 
+                 comp === "AngelList" ? "Investment Platform" : "Management Platform"}
+              </td>
             </tr>
           ))}
         </tbody>
@@ -285,30 +234,51 @@ const CompetitorTable = () => {
   );
 };
 
-// ─── PRICING ─────────────────────────────────────────────────────────────────
-const PricingComparison = () => {
-  const tiers = [
-    { tier: "Free Tier", storage: "5 GB", price: "$0", provider: "Google Drive / iCloud", note: "Entry point" },
-    { tier: "Consumer Basic", storage: "100–200 GB", price: "$20–30/yr", provider: "Google One, iCloud+", note: "Individual use" },
-    { tier: "Consumer Family", storage: "2 TB", price: "$100–120/yr", provider: "Google, Apple, pCloud", note: "Household" },
-    { tier: "SME Starter", storage: "1 TB (2 users)", price: "$170/yr", provider: "Sync.com", note: "Small business" },
-    { tier: "SME Team", storage: "1 TB (10 users)", price: "$260/yr", provider: "Sync.com", note: "Team plan" },
-    { tier: "SME Enterprise", storage: "1 TB (unlimited)", price: "$650/yr", provider: "Sync.com", note: "Unlimited users" },
-    { tier: "Cloud Setup (1yr)", storage: "Initial", price: "$28,600", provider: "Cloud (avg)", note: "vs $93,200 on-prem" },
-    { tier: "Cloud Annual Ops", storage: "Ongoing", price: "$9,600/yr", provider: "Cloud (avg)", note: "vs $80,200 on-prem" },
-  ];
+// Trend Research
+const TrendResearch = ({ responses }: { responses: unknown[] }) => {
+  const trendAnswer = getSectionAnswer(responses, "trendResearch");
+  const sentences = trendAnswer.split(/\.\s+/).filter((s: string) => s.length > 30);
+  const trends = sentences.slice(0, 6);
+  
+  if (trends.length === 0) {
+    return <Card className="p-8 text-center text-muted-foreground">{trendAnswer || "No trend data available"}</Card>;
+  }
+  
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      {trends.map((trend: string, i: number) => (
+        <Card key={i} className="p-4 transition-all duration-200 hover:shadow-md" hover>
+          <div className="flex items-start gap-3">
+            <div className="p-2 rounded-lg flex-shrink-0" style={{ background: `${T.primary}15` }}>
+              <Brain className="h-5 w-5" style={{ color: T.primary }} />
+            </div>
+            <div className="flex-1">
+              <p className="text-sm font-semibold mb-1" style={{ color: T.foreground }}>{trend.substring(0, 60)}{trend.length > 60 ? "..." : ""}</p>
+              <p className="text-xs leading-relaxed" style={{ color: T.mutedForeground }}>{trend}</p>
+            </div>
+          </div>
+        </Card>
+      ))}
+    </div>
+  );
+};
+
+// Pricing Comparison
+const PricingComparison = ({ responses }: { responses: unknown[] }) => {
+  const pricingAnswer = getSectionAnswer(responses, "pricingResearch");
+  const lines = pricingAnswer.split(/\.\s+|\n/).filter((l: string) => l.includes("$") || l.toLowerCase().includes("free"));
+  const pricingLines = lines.slice(0, 6);
+  
+  if (pricingLines.length === 0) {
+    return <Card className="p-8 text-center text-muted-foreground">{pricingAnswer || "No pricing data available"}</Card>;
+  }
+  
   return (
     <div className="space-y-2">
-      {tiers.map((t, i) => (
-        <div key={i} className="flex items-center justify-between p-3 rounded-xl border hover:shadow-sm transition-all"
-          style={{ borderColor: T.border, background: i % 2 === 0 ? T.surface : T.surfaceAlt }}>
+      {pricingLines.map((line: string, i: number) => (
+        <div key={i} className="flex items-center justify-between p-3 rounded-xl border transition-all hover:shadow-sm" style={{ borderColor: T.border, background: i % 2 === 0 ? T.card : T.input }}>
           <div className="flex-1">
-            <span className="text-sm font-semibold" style={{ color: T.text }}>{t.tier}</span>
-            <span className="text-xs ml-2" style={{ color: T.muted }}>{t.storage} · {t.provider}</span>
-          </div>
-          <div className="text-right">
-            <p className="text-sm font-bold" style={{ color: T.primary }}>{t.price}</p>
-            <p className="text-xs" style={{ color: T.muted }}>{t.note}</p>
+            <span className="text-sm" style={{ color: T.foreground }}>{line.substring(0, 80)}{line.length > 80 ? "..." : ""}</span>
           </div>
         </div>
       ))}
@@ -316,101 +286,27 @@ const PricingComparison = () => {
   );
 };
 
-// ─── MARKET SHARE BARS ───────────────────────────────────────────────────────
-const MarketShareBars = () => {
-  const items = [
-    { name: "AWS", pct: 28, color: "#f97316" },
-    { name: "Microsoft Azure", pct: 21, color: T.info },
-    { name: "Google Cloud", pct: 14, color: T.success },
-    { name: "Others (Tencent, Oracle, IBM, etc.)", pct: 37, color: T.muted },
-  ];
-  return (
-    <div className="space-y-4">
-      {items.map((m) => (
-        <div key={m.name}>
-          <div className="flex justify-between text-xs mb-1">
-            <span className="font-medium" style={{ color: T.text }}>{m.name}</span>
-            <span className="font-bold" style={{ color: m.color }}>{m.pct}%</span>
-          </div>
-          <div className="h-2.5 rounded-full" style={{ background: T.border }}>
-            <div className="h-full rounded-full transition-all duration-700" style={{ width: `${m.pct}%`, background: m.color }} />
-          </div>
-        </div>
-      ))}
-      <p className="text-xs mt-3 italic" style={{ color: T.muted }}>
-        Source: Synergy Research Group, Q4 2025 (IaaS/PaaS/hosted private cloud infrastructure revenues)
-      </p>
-    </div>
-  );
-};
-
-// ─── REGIONAL INSIGHTS ───────────────────────────────────────────────────────
-const RegionalInsights = () => {
-  const regions = [
-    {
-      name: "North America", share: "40%", trend: "Dominant", color: T.primary,
-      highlights: ["US: $74.8B market in 2025 (46.4% global)", "Projected $90.9B in 2026", "Led by Apple iCloud, Google Drive", "Major data center infrastructure hub"],
-    },
-    {
-      name: "Asia-Pacific", share: "36% by 2035", trend: "Fastest Growing", color: T.success,
-      highlights: ["China has ~1B social media users", "India has 250M+ social media users", "Tencent Cloud & Alibaba dominate locally", "91% of users prefer in-country storage (China)"],
-    },
-    {
-      name: "East Asia (Sub-region)", share: "15% global (2025)", trend: "Emerging", color: T.warning,
-      highlights: ["China leads regional consumption (35%)", "Japan avg broadband: 286 Mbps (2024)", "Strong domestic provider preference", "1.02B broadband subscriptions in China"],
-    },
-    {
-      name: "North America (Detailed)", share: "28.2% (2025)", trend: "Stable Leader", color: T.info,
-      highlights: ["USA: 22.1% of global market", "Canada: 3.85%", "Mexico: 2.26%", "Hyperscale data centers dominant"],
-    },
-  ];
+// Pain Points
+const PainPoints = ({ responses }: { responses: unknown[] }) => {
+  const painAnswer = getSectionAnswer(responses, "customerPainPoints");
+  const sentences = painAnswer.split(/\.\s+/).filter((s: string) => s.length > 30);
+  const points = sentences.slice(0, 8);
+  
+  if (points.length === 0) {
+    return <Card className="p-8 text-center text-muted-foreground">{painAnswer || "No pain point data available"}</Card>;
+  }
+  
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-      {regions.map((r) => (
-        <Card key={r.name} className="p-5">
-          <div className="flex items-center justify-between mb-3">
-            <h4 className="font-bold text-sm" style={{ color: T.text }}>{r.name}</h4>
-            <Pill color={r.trend === "Fastest Growing" ? "green" : r.trend === "Dominant" ? "blue" : "gray"}>{r.trend}</Pill>
-          </div>
-          <p className="text-2xl font-black mb-3" style={{ color: r.color, fontFamily: "'Georgia', serif" }}>{r.share}</p>
-          <ul className="space-y-1">
-            {r.highlights.map((h, i) => (
-              <li key={i} className="text-xs flex items-start gap-2" style={{ color: T.muted }}>
-                <span className="mt-1.5 w-1 h-1 rounded-full flex-shrink-0" style={{ background: r.color }} />
-                {h}
-              </li>
-            ))}
-          </ul>
-        </Card>
-      ))}
-    </div>
-  );
-};
-
-// ─── TREND RESEARCH ───────────────────────────────────────────────────────────
-const TrendResearch = () => {
-  const trends = [
-    { title: "AI Workloads Driving Storage Demand", desc: "RAG patterns, vector indexes, embedding stores, training datasets – all storage-intensive. Hyperscaler AI capex accelerating.", icon: Brain, badge: "Accelerating", color: T.primary },
-    { title: "Memory Chip Supply Risk", desc: "Micron ($25B capex 2026), SK Hynix (~$27B), Samsung all expanding simultaneously → oversupply risk within 2–3 years.", icon: Cpu, badge: "Risk", color: T.danger },
-    { title: "Optical Tech Emerging", desc: "Optical stocks (Lumentum, Ciena, Corning, Coherent) are top S&P 500 performers in 2026 as next AI bottleneck solution.", icon: Zap, badge: "Hot in 2026", color: T.warning },
-    { title: "Consumer Hybrid Storage", desc: "Fastest-growing segment: balance between local device backups and encrypted cloud vaults for performance + reliability.", icon: Cloud, badge: "Growing", color: T.success },
-    { title: "Zero-Trust & Privacy", desc: "End-to-end encryption, data sovereignty, and transparent data policies increasingly demanded by consumers.", icon: Lock, badge: "Rising", color: T.info },
-    { title: "Digital Legacy & Post-Death Backup", desc: "Nascent but growing market for memory preservation, estate digital assets, and AI-generated memory restoration.", icon: Infinity, badge: "Emerging", color: "#7c3aed" },
-  ];
-  return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-      {trends.map((t) => (
-        <Card key={t.title} className="p-4 hover:shadow-md transition-shadow">
+      {points.map((point: string, i: number) => (
+        <Card key={i} className="p-4 transition-all duration-200 hover:shadow-md" hover>
           <div className="flex items-start gap-3">
-            <div className="p-2 rounded-lg flex-shrink-0" style={{ background: `${t.color}15` }}>
-              <t.icon className="h-5 w-5" style={{ color: t.color }} />
+            <div className="p-2 rounded-lg flex-shrink-0" style={{ background: `${T.tertiary}15` }}>
+              <AlertCircle className="h-4 w-4" style={{ color: T.tertiary }} />
             </div>
             <div className="flex-1">
-              <div className="flex items-center justify-between mb-1 gap-2 flex-wrap">
-                <p className="text-sm font-semibold" style={{ color: T.text }}>{t.title}</p>
-                <Pill color={t.badge === "Risk" ? "red" : t.badge === "Accelerating" ? "blue" : t.badge === "Hot in 2026" ? "orange" : "green"}>{t.badge}</Pill>
-              </div>
-              <p className="text-xs leading-relaxed" style={{ color: T.muted }}>{t.desc}</p>
+              <p className="text-sm font-semibold mb-1" style={{ color: T.foreground }}>{point.substring(0, 50)}{point.length > 50 ? "..." : ""}</p>
+              <p className="text-xs leading-relaxed" style={{ color: T.mutedForeground }}>{point}</p>
             </div>
           </div>
         </Card>
@@ -419,151 +315,34 @@ const TrendResearch = () => {
   );
 };
 
-// ─── PAIN POINTS ─────────────────────────────────────────────────────────────
-const PainPoints = () => {
-  const points = [
-    { title: "Cost Uncertainty", desc: "Hidden fees, bandwidth charges, unpredictable egress/ingress pricing. SLA breach compensation rarely covers actual business losses.", severity: "High", icon: DollarSign },
-    { title: "Connectivity Dependency", desc: "Requires stable high-speed internet. Asymmetric bandwidth (uploads much slower than downloads) compounds large-file issues.", severity: "High", icon: Network },
-    { title: "Security & Data Breaches", desc: "Misconfigurations, weak permissions, and lack of encryption. Users remain liable even when the provider is breached.", severity: "Critical", icon: Shield },
-    { title: "Syncing & Access Failures", desc: "Version conflicts, sync delays, and access errors — especially multi-device environments. OneDrive auto-folder creation cited frequently.", severity: "Medium", icon: AlertCircle },
-    { title: "Data Portability Lock-in", desc: "Moving data between providers is expensive (egress fees) and slow. Providers make ingress easy, egress painful.", severity: "High", icon: Lock },
-    { title: "SLA Transparency", desc: "Boilerplate SLAs accepted by 80% of customers. Breach compensation is usually service credits, not actual damages.", severity: "Medium", icon: FileText },
-    { title: "Storage Limits on Free Plans", desc: "Google Drive storage-full complaints widespread. Users forced into paid tiers unexpectedly.", severity: "Medium", icon: HardDrive },
-    { title: "Unclear Data Ownership", desc: "Where data is actually stored, who owns it, and how to guarantee complete deletion remain opaque to users.", severity: "High", icon: Database },
-  ];
-  const sev: Record<string, string> = { Critical: "red", High: "orange", Medium: "gray" };
-  return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-      {points.map((p) => (
-        <Card key={p.title} className="p-4">
-          <div className="flex items-start gap-3">
-            <div className="p-2 rounded-lg flex-shrink-0" style={{ background: "#fef2f2" }}>
-              <p.icon className="h-4 w-4 text-red-600" />
-            </div>
-            <div className="flex-1">
-              <div className="flex items-center justify-between mb-1 gap-2">
-                <p className="text-sm font-semibold" style={{ color: T.text }}>{p.title}</p>
-                <Pill color={sev[p.severity]}>{p.severity}</Pill>
-              </div>
-              <p className="text-xs leading-relaxed" style={{ color: T.muted }}>{p.desc}</p>
-            </div>
-          </div>
-        </Card>
-      ))}
-    </div>
-  );
-};
-
-// ─── SWOT ─────────────────────────────────────────────────────────────────────
-const Swot = () => {
-  const q = [
-    {
-      label: "Strengths", icon: CheckCircle, border: "#16a34a", bg: "from-green-50",
-      items: ["Decreasing operational costs vs. on-premise", "Remote & ubiquitous access", "Virtually unlimited scalability", "Flexible consumption-based pricing", "Reduced IT personnel requirements", "Accessible to startups and SMEs"],
-    },
-    {
-      label: "Weaknesses", icon: ThumbsDown, border: "#dc2626", bg: "from-red-50",
-      items: ["Bandwidth & connectivity dependency", "Unknown data physical locations", "Data ownership ambiguity", "Complex SLA negotiations", "Integration with legacy systems"],
-    },
-    {
-      label: "Opportunities", icon: TrendingUp, border: "#2563eb", bg: "from-blue-50",
-      items: ["AI-powered memory restoration", "Digital legacy & estate planning market", "Hybrid storage (local + cloud) adoption", "APAC's 1B+ users driving demand", "Privacy-first consumer niche", "Post-death backup services"],
-    },
-    {
-      label: "Threats", icon: AlertCircle, border: "#d97706", bg: "from-orange-50",
-      items: ["Hyperscaler market concentration (AWS/MSFT/GCP = 63%)", "Memory chip oversupply risk (2–3yr horizon)", "Data breach regulatory penalties (GDPR, CCPA)", "Consumer reluctance to change providers", "AI capex slowdown affecting cloud demand"],
-    },
-  ];
-  return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-      {q.map((s) => (
-        <div key={s.label} className={`rounded-2xl border-l-4 bg-gradient-to-br ${s.bg} to-white p-5 shadow-sm`}
-          style={{ borderLeftColor: s.border }}>
-          <h4 className="font-bold text-sm mb-3 flex items-center gap-2" style={{ color: s.border }}>
-            <s.icon className="h-4 w-4" /> {s.label}
-          </h4>
-          <ul className="space-y-1.5">
-            {s.items.map((item, i) => (
-              <li key={i} className="text-xs flex items-start gap-2" style={{ color: T.muted }}>
-                <span className="mt-1 w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: s.border }} />
-                {item}
-              </li>
-            ))}
-          </ul>
-        </div>
-      ))}
-    </div>
-  );
-};
-
-// ─── SOCIAL SENTIMENT ────────────────────────────────────────────────────────
-const SocialSentiment = () => {
-  const sources = [
-    {
-      platform: "Reddit", icon: Hash, color: "#ff4500",
-      sentiment: "Mixed",
-      findings: [
-        "OneDrive commonly criticized for auto-creating top-level folders and sync issues",
-        "Google Drive and OneDrive recommended as best mainstream options in 2026",
-        "User choice depends heavily on individual workflows — no single best provider",
-        "r/cloudstorage and r/datastorage are active communities discussing alternatives",
-      ],
-    },
-    {
-      platform: "YouTube", icon: Youtube, color: "#ff0000",
-      sentiment: "Promotional",
-      findings: [
-        "pCloud featured prominently with 40% discount offers for 2026 comparisons",
-        "Google Drive storage-full problem is a widely searched topic",
-        "Best cloud storage comparison videos are high-traffic in 2026",
-        "Content warns: 'Don't Trust the Cloud' — always backup your online data",
-      ],
-    },
-    {
-      platform: "Quora", icon: MessageSquare, color: "#b92b27",
-      sentiment: "Informational",
-      findings: [
-        "Cloud storage recommended for backups and small infrastructure",
-        "IDrive, Google Drive, and Nextcloud cited as top reliable picks",
-        "Free services have limitations; paid options offer better reliability",
-        "AWS considered overkill for casual individual use",
-      ],
-    },
-    {
-      platform: "X (Twitter)", icon: Twitter, color: "#1d9bf0",
-      sentiment: "B2B / Institutional",
-      findings: [
-        "Memory cloud storage discussion dominated by enterprise AI infrastructure angles",
-        "Cisco Q3 FY26 call signals positive AI infrastructure spending and memory demand",
-        "Supply tightening for memory components mentioned (Nanya, Micron, SK Hynix)",
-        "Consumer sentiment data limited — mostly institutional/investor discussion",
-      ],
-    },
-    {
-      platform: "Instagram", icon: Instagram, color: "#e1306c",
-      sentiment: "Marketing Insights",
-      findings: [
-        "Influencer marketing reshaping cloud service promotion strategies",
-        "Multi-influencer campaigns (vs single celebrity) growing in 2026",
-        "59% of marketers planned to partner with more influencers in 2025",
-        "Shoppable Reels, AI-powered content, and expert-backed tutorials leading trends",
-      ],
-    },
-  ];
-  const sentColor: Record<string, string> = { Mixed: "gray", Promotional: "orange", Informational: "blue", "B2B / Institutional": "purple", "Marketing Insights": "green" };
+// Social Sentiment
+const SocialSentiment = ({ responses }: { responses: unknown[] }) => {
+  const socialSections = ["redditReviews", "youtubeReviews", "quoraReviews", "twitterSentiment", "instagramInsights"];
+  const platforms = ["Reddit", "YouTube", "Quora", "X (Twitter)", "Instagram"];
+  const colors = ["#ff4500", "#ff0000", "#b92b27", "#1d9bf0", "#e1306c"];
+  
+  const sources = socialSections.map((section, idx) => {
+    const answer = getSectionAnswer(responses, section);
+    const findings = answer.split(/\.\s+/).filter((s: string) => s.length > 20).slice(0, 4);
+    
+    return {
+      platform: platforms[idx],
+      color: colors[idx],
+      findings: findings.length ? findings : [`No ${platforms[idx]} data available`],
+    };
+  }).filter(s => s.findings[0] !== `No ${s.platform} data available` || s.findings.length > 0);
+  
+  if (sources.length === 0) {
+    return <Card className="p-8 text-center text-muted-foreground">No social sentiment data available</Card>;
+  }
+  
   return (
     <div className="space-y-4">
       {sources.map((s) => (
-        <Collapsible key={s.platform} title={
-          <div className="flex items-center gap-3">
-            {/* <sicon className="h-4 w-4" style={{ color: s.color }} /> */}
-            <span>{s.platform}</span>
-            <Pill color={sentColor[s.sentiment]}>{s.sentiment}</Pill>
-          </div>
-        } defaultOpen={s.platform === "Reddit"}>
+        <Collapsible key={s.platform} title={<span className="flex items-center gap-2"><span className="w-2 h-2 rounded-full" style={{ background: s.color }}></span>{s.platform}</span>} defaultOpen={s.platform === "Reddit"}>
           <ul className="space-y-2">
             {s.findings.map((f, i) => (
-              <li key={i} className="text-sm flex items-start gap-2" style={{ color: T.muted }}>
+              <li key={i} className="text-sm flex items-start gap-2" style={{ color: T.mutedForeground }}>
                 <span className="mt-1.5 w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: s.color }} />
                 {f}
               </li>
@@ -575,72 +354,51 @@ const SocialSentiment = () => {
   );
 };
 
-// ─── STARTUP VALIDATION ───────────────────────────────────────────────────────
-const StartupValidation = () => {
-  const signals = [
-    { label: "Market validation", value: "Strong", desc: "Cloud storage market growing at 21.9% CAGR with proven consumer demand", positive: true },
-    { label: "Niche opportunity", value: "Moderate", desc: "Digital legacy / memory preservation largely unserved by hyperscalers", positive: true },
-    { label: "Technical readiness", value: "Low", desc: "Neural memory digitization is unproven; AI-enhanced photo/video storage is feasible today", positive: false },
-    { label: "Competitive pressure", value: "High", desc: "AWS, Azure, GCP dominate 63% of infrastructure; Apple & Google lead consumer mindshare", positive: false },
-    { label: "Funding environment", value: "Active", desc: "AI infrastructure and AI memory convergence attracting large VC rounds in 2026", positive: true },
-    { label: "Regulatory landscape", value: "Complex", desc: "GDPR, CCPA, emerging AI memory laws, and data sovereignty requirements need careful navigation", positive: false },
+// SWOT Analysis
+const Swot = ({ responses }: { responses: unknown[] }) => {
+  const swotAnswer = getSectionAnswer(responses, "swotAnalysis");
+  const sections = {
+    Strengths: swotAnswer.match(/Strengths?:?\s*([^.]*(?:\.|$))/i)?.[1]?.split(/,\s*/).slice(0, 5) || [],
+    Weaknesses: swotAnswer.match(/Weaknesses?:?\s*([^.]*(?:\.|$))/i)?.[1]?.split(/,\s*/).slice(0, 5) || [],
+    Opportunities: swotAnswer.match(/Opportunities?:?\s*([^.]*(?:\.|$))/i)?.[1]?.split(/,\s*/).slice(0, 5) || [],
+    Threats: swotAnswer.match(/Threats?:?\s*([^.]*(?:\.|$))/i)?.[1]?.split(/,\s*/).slice(0, 5) || [],
+  };
+  
+  const hasData = Object.values(sections).some(arr => arr.length > 0);
+  
+  if (!hasData) {
+    return <Card className="p-8 text-center text-muted-foreground">{swotAnswer || "No SWOT analysis available"}</Card>;
+  }
+  
+  const q = [
+    { label: "Strengths", icon: CheckCircle, border: "#16a34a", bg: "rgba(22,163,74,0.1)", items: sections.Strengths },
+    { label: "Weaknesses", icon: ThumbsDown, border: "#dc2626", bg: "rgba(220,38,38,0.1)", items: sections.Weaknesses },
+    { label: "Opportunities", icon: TrendingUp, border: "#2563eb", bg: "rgba(37,99,235,0.1)", items: sections.Opportunities },
+    { label: "Threats", icon: AlertCircle, border: "#d97706", bg: "rgba(217,119,6,0.1)", items: sections.Threats },
   ];
+  
   return (
-    <div className="space-y-3">
-      {signals.map((s) => (
-        <div key={s.label} className="flex items-start gap-4 p-4 rounded-xl border" style={{ borderColor: T.border }}>
-          <div className="flex-shrink-0 mt-0.5">
-            {s.positive
-              ? <CheckCircle className="h-5 w-5 text-green-600" />
-              : <AlertCircle className="h-5 w-5 text-orange-500" />}
-          </div>
-          <div className="flex-1">
-            <div className="flex items-center gap-2 mb-1">
-              <p className="text-sm font-semibold" style={{ color: T.text }}>{s.label}</p>
-              <Pill color={s.positive ? "green" : "orange"}>{s.value}</Pill>
-            </div>
-            <p className="text-xs" style={{ color: T.muted }}>{s.desc}</p>
-          </div>
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+      {q.map((s) => (
+        <div key={s.label} className="rounded-xl border-l-4 p-5 shadow-sm transition-all hover:shadow-md" style={{ borderLeftColor: s.border, background: T.card, borderColor: T.border }}>
+          <h4 className="font-bold text-sm mb-3 flex items-center gap-2" style={{ color: s.border }}>
+            <s.icon className="h-4 w-4" /> {s.label}
+          </h4>
+          <ul className="space-y-1.5">
+            {s.items.map((item, i) => (
+              <li key={i} className="text-xs flex items-start gap-2" style={{ color: T.mutedForeground }}>
+                <span className="mt-1 w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: s.border }} />
+                {item.trim()}
+              </li>
+            ))}
+          </ul>
         </div>
       ))}
     </div>
   );
 };
 
-// ─── STRATEGIC RECS ───────────────────────────────────────────────────────────
-const StrategicRecs = () => {
-  const recs = [
-    { p: "P0", title: "Validate Technical Feasibility", timeline: "0–3 mo", impact: "Critical", desc: "Partner with neuroscience and AI research institutions. Define what 'memory storage' means technically — neural data vs. enriched photo/video/audio." },
-    { p: "P0", title: "Launch Privacy-First MVP", timeline: "3–6 mo", impact: "Critical", desc: "Build enhanced photo/video storage with AI tagging, facial recognition, and smart timelines. End-to-end encryption mandatory from day one." },
-    { p: "P1", title: "Target Legacy Planning Niche", timeline: "6–9 mo", impact: "High", desc: "Partner with funeral homes, estate attorneys, and memory care facilities. FOREVER.com shows this segment exists and pays." },
-    { p: "P1", title: "Develop AI Memory Restoration", timeline: "9–12 mo", impact: "High", desc: "Use generative AI to restore degraded old photos/videos and generate contextual memory narratives from stored media." },
-    { p: "P2", title: "APAC Market Entry", timeline: "12–18 mo", impact: "Medium", desc: "Target India and Southeast Asia — digital adoption is fast, legacy cloud penetration is lower, and local data sovereignty creates opportunity." },
-    { p: "P2", title: "Build Post-Death Memory Service", timeline: "18–24 mo", impact: "Medium", desc: "Enable users to designate memory heirs, create digital wills, and configure automated memory-sharing after death." },
-  ];
-  const pColor: Record<string, string> = { P0: "#dc2626", P1: "#f97316", P2: "#2563eb" };
-  return (
-    <div className="space-y-3">
-      {recs.map((r, i) => (
-        <Card key={i} className="p-4 hover:shadow-md transition-shadow">
-          <div className="flex items-start gap-4">
-            <div className="w-10 h-10 rounded-xl flex items-center justify-center text-white text-xs font-black flex-shrink-0"
-              style={{ background: pColor[r.p] }}>{r.p}</div>
-            <div className="flex-1">
-              <div className="flex items-center gap-2 flex-wrap mb-1">
-                <p className="text-sm font-bold" style={{ color: T.text }}>{r.title}</p>
-                <Pill color="gray">{r.timeline}</Pill>
-                <Pill color={r.impact === "Critical" ? "red" : r.impact === "High" ? "orange" : "blue"}>{r.impact} Impact</Pill>
-              </div>
-              <p className="text-xs leading-relaxed" style={{ color: T.muted }}>{r.desc}</p>
-            </div>
-          </div>
-        </Card>
-      ))}
-    </div>
-  );
-};
-
-// ─── RESEARCH SOURCES ─────────────────────────────────────────────────────────
+// Research Sources
 const ResearchSources = ({ responses }: { responses: unknown[] }) => {
   const sectionLabels: Record<string, string> = {
     marketResearch: "Market Research",
@@ -662,25 +420,19 @@ const ResearchSources = ({ responses }: { responses: unknown[] }) => {
     fundingResearch: "Funding Research",
     allPlatformReviews: "All Platform Reviews",
   };
+  
   return (
     <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
       {responses.map((item, idx) => {
         const row = asRecord(item);
         if (!row) return null;
-        const section = pretty(row.section) || `Section ${idx + 1}`;
+        const section = String(row.section || `Section ${idx + 1}`);
         const ok = row.success === true;
         const label = sectionLabels[section] || section;
         return (
-          <div key={`${section}-${idx}`}
-            className="flex items-center gap-2 p-3 rounded-xl border text-xs font-medium"
-            style={{
-              background: ok ? "#f0fdf4" : "#fef2f2",
-              borderColor: ok ? "#bbf7d0" : "#fecaca",
-              color: ok ? "#166534" : "#991b1b",
-            }}>
-            {ok
-              ? <CheckCircle className="h-3.5 w-3.5 text-green-600 flex-shrink-0" />
-              : <AlertCircle className="h-3.5 w-3.5 text-red-600 flex-shrink-0" />}
+          <div key={`${section}-${idx}`} className="flex items-center gap-2 p-3 rounded-xl border text-xs font-medium transition-all hover:shadow-sm"
+            style={{ background: ok ? "rgba(5,150,105,0.1)" : "rgba(220,38,38,0.1)", borderColor: ok ? "rgba(5,150,105,0.3)" : "rgba(220,38,38,0.3)", color: ok ? "#166534" : "#991b1b" }}>
+            {ok ? <CheckCircle className="h-3.5 w-3.5 text-green-600 flex-shrink-0" /> : <AlertCircle className="h-3.5 w-3.5 text-red-600 flex-shrink-0" />}
             {label}
           </div>
         );
@@ -689,59 +441,160 @@ const ResearchSources = ({ responses }: { responses: unknown[] }) => {
   );
 };
 
-// ─── FUNDING LANDSCAPE ────────────────────────────────────────────────────────
-const FundingLandscape = () => (
-  <div className="space-y-4">
-    <div className="p-4 rounded-xl border" style={{ borderColor: T.border, background: T.surfaceAlt }}>
-      <p className="text-xs font-semibold mb-2" style={{ color: T.muted }}>KEY FUNDING SIGNALS (2026)</p>
-      <div className="space-y-2">
-        {[
-          { company: "OpenAI", val: "$800B valuation", note: "Record valuation in AI history" },
-          { company: "Anthropic", val: "$45B revenue run rate", note: "80x growth in last quarter" },
-          { company: "SpaceX", val: "Pre-IPO largest startup", note: "Musk path to first trillionaire" },
-          { company: "AI Cybersecurity Startups", val: "Large early rounds", note: "Seed→Series A compressing" },
-        ].map((f, i) => (
-          <div key={i} className="flex items-center justify-between p-2 rounded-lg bg-white border" style={{ borderColor: T.border }}>
-            <div>
-              <p className="text-xs font-semibold" style={{ color: T.text }}>{f.company}</p>
-              <p className="text-xs" style={{ color: T.muted }}>{f.note}</p>
+// Startup Validation
+const StartupValidation = ({ responses }: { responses: unknown[] }) => {
+  const validationAnswer = getSectionAnswer(responses, "startupValidation");
+  const sentences = validationAnswer.split(/\.\s+/).filter((s: string) => s.length > 30);
+  
+  if (sentences.length === 0) {
+    return <Card className="p-8 text-center text-muted-foreground">{validationAnswer || "No startup validation data available"}</Card>;
+  }
+  
+  return (
+    <div className="space-y-3">
+      {sentences.slice(0, 6).map((sentence: string, i: number) => {
+        const isPositive = sentence.toLowerCase().includes("success") || 
+                          sentence.toLowerCase().includes("raised") ||
+                          sentence.toLowerCase().includes("growing") ||
+                          sentence.toLowerCase().includes("opportunity");
+        
+        return (
+          <Card key={i} className="p-4 transition-all hover:shadow-sm" hover>
+            <div className="flex items-start gap-4">
+              <div className="flex-shrink-0 mt-0.5">
+                {isPositive ? <CheckCircle className="h-5 w-5 text-green-600" /> : <AlertCircle className="h-5 w-5 text-orange-500" />}
+              </div>
+              <div className="flex-1">
+                <p className="text-xs leading-relaxed" style={{ color: T.mutedForeground }}>{sentence}.</p>
+              </div>
             </div>
-            <Pill color="blue">{f.val}</Pill>
-          </div>
-        ))}
-      </div>
+          </Card>
+        );
+      })}
     </div>
-    <Card className="p-4">
-      <p className="text-sm font-semibold mb-2" style={{ color: T.text }}>Funding Outlook for Memory Storage Startup</p>
-      <p className="text-xs leading-relaxed mb-3" style={{ color: T.muted }}>
-        No direct funding data found for memory cloud storage startups specifically. The broader AI + cloud infrastructure space is attracting
-        massive capital. A memory-preservation startup with a clear privacy-first angle and AI differentiation could tap:
-      </p>
-      <ul className="space-y-1.5">
-        {[
-          "Consumer AI / personal data management VCs",
-          "Legacy / estate planning industry strategics",
-          "Healthcare / neuroscience focused funds (long-term)",
-          "European privacy-tech investors (GDPR-aligned niche)",
-        ].map((item, i) => (
-          <li key={i} className="text-xs flex items-start gap-2" style={{ color: T.muted }}>
-            <span className="mt-1 w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: T.primary }} />
-            {item}
-          </li>
-        ))}
-      </ul>
-    </Card>
-  </div>
-);
+  );
+};
+
+// Strategic Recommendations
+const StrategicRecs = ({ mergedResponse }: { mergedResponse: string }) => {
+  const lines = mergedResponse.split("\n");
+  const recs: string[] = [];
+  let inRecs = false;
+  
+  for (const line of lines) {
+    if (line.match(/^\d+\./)) {
+      recs.push(line);
+      inRecs = true;
+    } else if (inRecs && line.trim().startsWith("-")) {
+      recs[recs.length - 1] += " " + line.trim();
+    } else if (inRecs && line.trim() === "") {
+      // Continue
+    } else if (inRecs && !line.match(/^\d+\./) && line.trim().length > 0) {
+      recs[recs.length - 1] += " " + line.trim();
+    }
+  }
+  
+  const recommendations = recs.slice(0, 6);
+  
+  if (recommendations.length === 0) {
+    return <Card className="p-8 text-center text-muted-foreground">No strategic recommendations available</Card>;
+  }
+  
+  const pColor = ["#dc2626", "#f97316", "#2563eb", "#7c3aed", "#059669", T.primary];
+  
+  return (
+    <div className="space-y-3">
+      {recommendations.map((rec, i) => (
+        <Card key={i} className="p-4 transition-all hover:shadow-md" hover>
+          <div className="flex items-start gap-4">
+            <div className="w-10 h-10 rounded-xl flex items-center justify-center text-white text-xs font-black flex-shrink-0 shadow-sm" style={{ background: pColor[i % pColor.length] }}>
+              P{i+1}
+            </div>
+            <div className="flex-1">
+              <p className="text-sm leading-relaxed" style={{ color: T.mutedForeground }}>{rec}</p>
+            </div>
+          </div>
+        </Card>
+      ))}
+    </div>
+  );
+};
+
+// Regional Insights
+const RegionalInsights = ({ responses }: { responses: unknown[] }) => {
+  const allAnswers = [
+    getSectionAnswer(responses, "findTAM"),
+    getSectionAnswer(responses, "marketResearch"),
+    getSectionAnswer(responses, "trendResearch"),
+  ].join(" ");
+  
+  const regions = ["North America", "Europe", "Asia-Pacific", "China", "India", "US", "Germany"];
+  const insights: { name: string; data: string }[] = [];
+  
+  regions.forEach(region => {
+    const regex = new RegExp(`([^.]*${region}[^.]*\\.)`, 'gi');
+    const matches = allAnswers.match(regex);
+    if (matches && matches.length) {
+      insights.push({ name: region, data: matches[0].substring(0, 100) });
+    }
+  });
+  
+  if (insights.length === 0) {
+    return <Card className="p-8 text-center text-muted-foreground">No regional insights available</Card>;
+  }
+  
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      {insights.slice(0, 4).map((r, i) => (
+        <Card key={i} className="p-5 transition-all hover:shadow-md" hover>
+          <h4 className="font-bold text-sm mb-2" style={{ color: T.primary }}>{r.name}</h4>
+          <p className="text-xs leading-relaxed" style={{ color: T.mutedForeground }}>{r.data}</p>
+        </Card>
+      ))}
+    </div>
+  );
+};
+
+// TAM/SAM/SOM
+const TamSamSom = ({ responses }: { responses: unknown[] }) => {
+  const tamAnswer = getSectionAnswer(responses, "findTAM");
+  const samAnswer = getSectionAnswer(responses, "findSAM");
+  const somAnswer = getSectionAnswer(responses, "findSOM");
+  
+  const tamMatch = tamAnswer.match(/\$(\d+(?:\.\d+)?)\s*(billion|million|trillion)/i);
+  const samMatch = samAnswer.match(/\$(\d+(?:\.\d+)?)\s*(billion|million|trillion)/i);
+  const somMatch = somAnswer.match(/(\d+(?:\.\d+)?)%/i);
+  
+  const items = [
+    { label: "TAM", title: "Total Addressable Market", value: tamMatch ? `$${tamMatch[1]}${tamMatch[2] === "billion" ? "B" : tamMatch[2] === "million" ? "M" : ""}` : "Data available", detail: tamAnswer.substring(0, 80), color: T.primary },
+    { label: "SAM", title: "Serviceable Available Market", value: samMatch ? `$${samMatch[1]}${samMatch[2] === "billion" ? "B" : samMatch[2] === "million" ? "M" : ""}` : "Data available", detail: samAnswer.substring(0, 80), color: T.secondary },
+    { label: "SOM", title: "Serviceable Obtainable Market", value: somMatch ? `${somMatch[1]}%` : "Data available", detail: somAnswer.substring(0, 80), color: T.tertiary },
+  ];
+  
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      {items.map((m) => (
+        <Card key={m.label} className="p-6 flex flex-col transition-all hover:shadow-md" hover>
+          <div className="flex items-center justify-between mb-4">
+            <span className="text-3xl font-black" style={{ color: m.color, fontFamily: "'Geist', 'Inter', sans-serif" }}>{m.label}</span>
+            <span className="text-xs font-medium px-2 py-1 rounded-full" style={{ background: `${m.color}15`, color: m.color }}>{m.title}</span>
+          </div>
+          <p className="text-2xl font-bold mb-2" style={{ color: T.foreground }}>{m.value}</p>
+          <p className="text-xs leading-relaxed" style={{ color: T.mutedForeground }}>{m.detail}</p>
+        </Card>
+      ))}
+    </div>
+  );
+};
 
 // ─── MAIN COMPONENT ───────────────────────────────────────────────────────────
 export default function ResearchReportRenderer({ payload }: { payload: unknown }) {
   const root = asRecord(payload);
-
+  
   if (!root) {
     return (
-      <div className="flex items-center justify-center min-h-64 rounded-2xl border border-gray-200 bg-gray-50">
-        <p className="text-gray-500 text-sm">No structured research report found.</p>
+      <div className="flex items-center justify-center min-h-64 rounded-xl border border-border bg-card">
+        <p className="text-muted-foreground text-sm">No structured research report found.</p>
       </div>
     );
   }
@@ -751,158 +604,121 @@ export default function ResearchReportRenderer({ payload }: { payload: unknown }
   const mergedResponse = pretty(root.mergedResponse);
   const successfulCount = searchAgentResponses.filter((i) => asRecord(i)?.success === true).length;
 
-  const topic = pretty(summarizedRequest?.topic) || "Memory Cloud Storage";
-  const audience = pretty(summarizedRequest?.audience) || "General consumers";
-  const intent = pretty(summarizedRequest?.intent) || "Research & Analysis";
+  const topic = String(summarizedRequest?.topic || "Market Research Report");
+  const audience = String(summarizedRequest?.audience || "");
+  const intent = String(summarizedRequest?.intent || "");
   const competitors = asArray(summarizedRequest?.competitors);
 
   return (
-    <div className="min-h-screen pb-16" style={{ background: T.bg, fontFamily: "'Helvetica Neue', Arial, sans-serif" }}>
-      <div className="max-w-6xl mx-auto px-4 py-8">
-
-        {/* ── HEADER ── */}
-        <div className="relative overflow-hidden rounded-3xl mb-8" style={{ background: T.gradient }}>
-          <div className="absolute inset-0 opacity-10"
-            style={{ backgroundImage: "radial-gradient(circle at 70% 50%, white 0%, transparent 60%)" }} />
+    <div className="min-h-screen pb-16" style={{ background: T.background }}>
+      <div className="max-w-7xl mx-auto px-4 py-8">
+        
+        {/* Header with Gradient */}
+        <div className="relative overflow-hidden rounded-2xl mb-8 gradient-primary shadow-lg">
           <div className="relative px-8 py-10">
             <div className="flex items-center gap-2 mb-4">
-              <Presentation className="h-5 w-5 text-white/70" />
-              <span className="text-white/70 text-sm font-medium">Market Research Report</span>
-              <span className="ml-auto text-white/50 text-xs">{new Date().toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}</span>
+              <Presentation className="h-5 w-5 text-white/80" />
+              <span className="text-white/80 text-sm font-medium tracking-wide">Market Research Report</span>
+              <span className="ml-auto text-white/60 text-xs">{new Date().toLocaleDateString()}</span>
             </div>
-            <h1 className="text-4xl font-black text-white mb-2" style={{ fontFamily: "'Georgia', serif" }}>{topic}</h1>
-            <p className="text-white/75 text-lg max-w-2xl mb-6">
-              Digital recording, storage, and replay of human memories · AI-powered restoration · Legacy preservation
-            </p>
+            <h1 className="text-4xl md:text-5xl font-bold text-white mb-3 tracking-tight">{topic}</h1>
+            {intent && <p className="text-white/80 text-lg max-w-2xl mb-6">{intent}</p>}
             <div className="flex flex-wrap gap-3">
-              <div className="flex items-center gap-2 px-4 py-2 rounded-full text-white/80 text-sm" style={{ background: "rgba(255,255,255,0.15)" }}>
-                <Users className="h-3.5 w-3.5" /> {audience}
-              </div>
-              <div className="flex items-center gap-2 px-4 py-2 rounded-full text-white/80 text-sm" style={{ background: "rgba(255,255,255,0.15)" }}>
-                <Compass className="h-3.5 w-3.5" /> {intent}
-              </div>
-              <div className="flex items-center gap-2 px-4 py-2 rounded-full text-white/80 text-sm" style={{ background: "rgba(255,255,255,0.15)" }}>
-                <Building className="h-3.5 w-3.5" /> {competitors.length} Competitor Categories
-              </div>
-              <div className="flex items-center gap-2 px-4 py-2 rounded-full text-white/80 text-sm" style={{ background: "rgba(255,255,255,0.15)" }}>
+              {audience && (
+                <div className="flex items-center gap-2 px-4 py-2 rounded-full text-white/90 text-sm backdrop-blur-sm" style={{ background: "rgba(255,255,255,0.15)" }}>
+                  <Users className="h-3.5 w-3.5" /> {audience}
+                </div>
+              )}
+              {competitors.length > 0 && (
+                <div className="flex items-center gap-2 px-4 py-2 rounded-full text-white/90 text-sm backdrop-blur-sm" style={{ background: "rgba(255,255,255,0.15)" }}>
+                  <Building className="h-3.5 w-3.5" /> {competitors.length} Competitors
+                </div>
+              )}
+              <div className="flex items-center gap-2 px-4 py-2 rounded-full text-white/90 text-sm backdrop-blur-sm" style={{ background: "rgba(255,255,255,0.15)" }}>
                 <CheckCircle className="h-3.5 w-3.5" /> {successfulCount}/{searchAgentResponses.length} Sources
               </div>
             </div>
           </div>
         </div>
 
-
-
-        {/* ── MARKET SIZE ── */}
+        {/* Executive Summary */}
         <section className="mb-10">
-          <SectionHeader title="Market Size & Growth" icon={BarChart3} badge="TAM · SAM · SOM" subtitle="Based on Allied Market Research, Fortune Business Insights, Research Nester (2025–2026)" />
-          <MarketKPIs />
-          <GrowthTimeline />
+          <SectionHeader title="Executive Summary" icon={FileText} subtitle="High-level overview of key findings" />
+          <ExecutiveSummary mergedResponse={mergedResponse} />
         </section>
 
-        {/* ── TAM SAM SOM ── */}
+        {/* Market Size & KPIs */}
         <section className="mb-10">
-          <SectionHeader title="Market Opportunity Breakdown" icon={Target} />
-          <TamSamSom />
+          <SectionHeader title="Market Size & Growth" icon={BarChart3} subtitle="Total addressable market and growth projections" />
+          <MarketKPIs responses={searchAgentResponses} />
         </section>
 
-        {/* ── TRENDS ── */}
+        {/* TAM/SAM/SOM */}
         <section className="mb-10">
-          <SectionHeader title="Market Trends (2026–2035)" icon={TrendingUp} badge="6 Key Trends" />
-          <TrendResearch />
+          <SectionHeader title="Market Opportunity Breakdown" icon={Target} subtitle="TAM, SAM, and SOM analysis" />
+          <TamSamSom responses={searchAgentResponses} />
         </section>
 
-        {/* ── REGIONAL ── */}
+        {/* Regional Insights */}
         <section className="mb-10">
-          <SectionHeader title="Regional Market Insights" icon={Globe} badge="4 Regions" />
-          <RegionalInsights />
+          <SectionHeader title="Regional Insights" icon={Globe} subtitle="Geographic market distribution" />
+          <RegionalInsights responses={searchAgentResponses} />
         </section>
 
-        {/* ── COMPETITORS + MARKET SHARE ── */}
+        {/* Market Trends */}
         <section className="mb-10">
-          <SectionHeader title="Competitive Landscape" icon={Building} badge="8 Players Analyzed" />
-          <Card className="p-0 overflow-hidden mb-6">
-            <CompetitorTable />
+          <SectionHeader title="Market Trends" icon={TrendingUp} subtitle="Emerging patterns and industry shifts" />
+          <TrendResearch responses={searchAgentResponses} />
+        </section>
+
+        {/* Competitive Landscape */}
+        <section className="mb-10">
+          <SectionHeader title="Competitive Landscape" icon={Building} badge={`${competitors.length} Competitors`} subtitle="Key players and market positioning" />
+          <Card className="p-0 overflow-hidden">
+            <CompetitorTable competitors={competitors as string[]} />
           </Card>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <Card className="p-5">
-              <p className="text-sm font-bold mb-4" style={{ color: T.text }}>Infrastructure Market Share (Q4 2025)</p>
-              <MarketShareBars />
-            </Card>
-            <Card className="p-5">
-              <p className="text-sm font-bold mb-4" style={{ color: T.text }}>Key Competitor Quotes</p>
-              <div className="space-y-3">
-                {[
-                  { src: "FOREVER.com", quote: "Guaranteed for your lifetime plus 100 years — permanent, private, no ads, no data mining." },
-                  { src: "Sync.com", quote: "Business plans from $170/yr (2 users) to $650/yr (unlimited users), all at 1TB." },
-                  { src: "Allied Market Research", quote: "Global cloud storage was $98.8B in 2023 and is projected to reach $777.6B by 2033 at 21.9% CAGR." },
-                ].map((q, i) => (
-                  <div key={i} className="p-3 rounded-xl border-l-4" style={{ borderLeftColor: T.accent, background: T.surfaceAlt }}>
-                    <p className="text-xs italic mb-1" style={{ color: T.muted }}>"{q.quote}"</p>
-                    <p className="text-xs font-semibold" style={{ color: T.primary }}>— {q.src}</p>
-                  </div>
-                ))}
-              </div>
-            </Card>
-          </div>
         </section>
 
-        {/* ── PRICING ── */}
+        {/* Pricing Landscape */}
         <section className="mb-10">
-          <SectionHeader title="Pricing Landscape" icon={DollarSign} badge="8 Tier Breakdown" />
-          <PricingComparison />
+          <SectionHeader title="Pricing Landscape" icon={DollarSign} subtitle="Monetization strategies and benchmarks" />
+          <PricingComparison responses={searchAgentResponses} />
         </section>
 
-        {/* ── PAIN POINTS ── */}
+        {/* Customer Pain Points */}
         <section className="mb-10">
-          <SectionHeader title="Customer Pain Points" icon={AlertCircle} badge="8 Issues Identified" />
-          <PainPoints />
+          <SectionHeader title="Customer Pain Points" icon={AlertCircle} subtitle="Key challenges and friction areas" />
+          <PainPoints responses={searchAgentResponses} />
         </section>
 
-        {/* ── SOCIAL SENTIMENT ── */}
+        {/* Social Sentiment */}
         <section className="mb-10">
-          <SectionHeader title="Social Sentiment & Platform Research" icon={MessageSquare} badge="5 Platforms" />
-          <SocialSentiment />
+          <SectionHeader title="Social Sentiment" icon={MessageSquare} subtitle="Community feedback across platforms" />
+          <SocialSentiment responses={searchAgentResponses} />
         </section>
 
-        {/* ── SWOT ── */}
+        {/* SWOT Analysis */}
         <section className="mb-10">
-          <SectionHeader title="SWOT Analysis" icon={PieChart} badge="Strategic Assessment" />
-          <Swot />
+          <SectionHeader title="SWOT Analysis" icon={PieChart} subtitle="Strengths, weaknesses, opportunities, threats" />
+          <Swot responses={searchAgentResponses} />
         </section>
 
-        {/* ── STARTUP VALIDATION ── */}
+        {/* Startup Validation */}
         <section className="mb-10">
-          <SectionHeader title="Startup Validation Signals" icon={Lightbulb} badge="Go/No-Go Framework" />
-          <StartupValidation />
+          <SectionHeader title="Startup Validation" icon={Lightbulb} subtitle="Market viability and success indicators" />
+          <StartupValidation responses={searchAgentResponses} />
         </section>
 
-        {/* ── FUNDING ── */}
+        {/* Strategic Recommendations */}
         <section className="mb-10">
-          <SectionHeader title="Funding Landscape" icon={DollarSign} badge="2026 Context" />
-          <FundingLandscape />
+          <SectionHeader title="Strategic Recommendations" icon={Target} subtitle="Actionable insights for market entry" />
+          <StrategicRecs mergedResponse={mergedResponse} />
         </section>
 
-        {/* ── STRATEGIC RECS ── */}
+        {/* Research Sources */}
         <section className="mb-10">
-          <SectionHeader title="Strategic Recommendations" icon={Target} badge="Prioritized Action Plan" />
-          <StrategicRecs />
-        </section>
-
-        {/* ── RESEARCH SOURCES ── */}
-        <section className="mb-10">
-          <SectionHeader
-            title="Research Sources"
-            icon={FolderSearch}
-            badge={`${successfulCount}/${searchAgentResponses.length} Successful`}
-            subtitle="AI-powered web research across market data, social platforms, and competitor intelligence"
-          />
+          <SectionHeader title="Research Sources" icon={FolderSearch} subtitle="Data sources and success status" />
           <ResearchSources responses={searchAgentResponses} />
-        </section>
-        {/* ── EXECUTIVE SUMMARY ── */}
-        <section className="mb-10">
-          <SectionHeader title="Executive Summary" icon={FileText} badge="AI-Synthesized" />
-          <ExecutiveSummary data={mergedResponse} />
         </section>
 
       </div>

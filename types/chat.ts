@@ -63,3 +63,62 @@ export type ChatSessionSummaryResponse = {
   total: number;
   hasMore: boolean;
 };
+
+export type AiCallUsage = {
+  id: string;
+  chatSessionId?: string | null;
+  agentRunId?: string | null;
+  agentType?: string | null;
+  callLabel?: string | null;
+  provider: string;
+  requestedModelName?: string | null;
+  finalModelName: string;
+  status: string;
+  inputTokens?: number | null;
+  outputTokens?: number | null;
+  totalTokens?: number | null;
+  latencyMs?: number | null;
+  errorMessage?: string | null;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type TavilyUsage = {
+  id: string;
+  chatSessionId?: string | null;
+  agentRunId?: string | null;
+  agentType?: string | null;
+  callLabel?: string | null;
+  query: string;
+  searchDepth: string;
+  topic?: string | null;
+  maxResults?: number | null;
+  includeAnswer?: boolean | null;
+  includeRawContent?: boolean | null;
+  includeImages?: boolean | null;
+  creditsUsed: number;
+  resultCount?: number | null;
+  status: string;
+  latencyMs?: number | null;
+  errorMessage?: string | null;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type ChatUsageResponse = {
+  chatId: string;
+  totals: {
+    ai: {
+      inputTokens: number;
+      outputTokens: number;
+      totalTokens: number;
+      calls: number;
+    };
+    tavily: {
+      creditsUsed: number;
+      calls: number;
+    };
+  };
+  aiCalls: AiCallUsage[];
+  tavilyUsages: TavilyUsage[];
+};

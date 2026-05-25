@@ -1,35 +1,13 @@
 "use client";
 
-import React, { useEffect, useMemo, useState, useRef } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import {
   Paperclip,
   Image,
   SendHorizonal,
-  FileText,
-  Map,
-  LineChart,
 } from "lucide-react";
 import { chatService } from "@/services/chat.service";
-import { ChatSession } from "@/types/chat";
-
-const actions = [
-  {
-    title: "Generate PRD",
-    icon: FileText,
-    description: "Create product requirements document",
-  },
-  {
-    title: "Build MVP Roadmap",
-    icon: Map,
-    description: "Plan your development journey",
-  },
-  {
-    title: "Market Research",
-    icon: LineChart,
-    description: "Analyze market opportunities",
-  },
-];
 
 const motivationalQuotes = [
   { text: "Validate Your Startup Idea", highlight: "Validate" },
@@ -42,22 +20,29 @@ const motivationalQuotes = [
 const NewProject = () => {
   const [idea, setIdea] = useState("");
   const [generating, setGenerating] = useState(false);
-  const [savedProjects, setSavedProjects] = useState<ChatSession[]>([]);
   const [quoteIndex, setQuoteIndex] = useState(0);
   const [isAnimating, setIsAnimating] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+  const [entitlement, setEntitlement] = useState<{
+    remainingProjects: number;
+    projectsCreated: number;
+  } | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const router = useRouter();
 
   useEffect(() => {
-    const loadSessions = async () => {
+    const loadEntitlement = async () => {
       try {
-        const sessions = await chatService.listSessions();
-        setSavedProjects(sessions);
+        const entitlementData = await chatService.getEntitlement();
+        setEntitlement({
+          remainingProjects: entitlementData.remainingProjects,
+          projectsCreated: entitlementData.projectsCreated,
+        });
       } catch (error) {
-        console.error("Failed to load sessions", error);
+        console.error("Failed to load entitlement", error);
       }
     };
-    void loadSessions();
+    void loadEntitlement();
   }, []);
 
   useEffect(() => {
@@ -84,15 +69,17 @@ const NewProject = () => {
     return () => textarea.removeEventListener("input", adjustHeight);
   }, [idea]);
 
-  const projects = useMemo(() => savedProjects, [savedProjects]);
-
   const handleGenerate = async () => {
     if (!idea.trim() || generating) return;
+    setErrorMessage("");
     setGenerating(true);
     try {
       const session = await chatService.createSession({ idea });
       router.push(`/dashboard/chat/${session.id}`);
-    } catch (error) {
+    } catch (error: unknown) {
+      const maybeResponse = (error as { response?: { data?: { message?: string } } })?.response;
+      const message = maybeResponse?.data?.message ?? "Failed to create session";
+      setErrorMessage(message);
       console.error("Failed to create session", error);
       setGenerating(false);
     }
@@ -161,6 +148,7 @@ const NewProject = () => {
           <p className="text-sm sm:text-base text-gray-500">
             Let AI guide your journey from concept to launch
           </p>
+
         </div>
 
         {/* Main Input Card */}
@@ -221,6 +209,13 @@ const NewProject = () => {
             </div>
           </div>
         </div>
+
+        {errorMessage && (
+          <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 mb-6">
+            {errorMessage}
+          </div>
+        )}
+
       </div>
 
       <style jsx global>{`

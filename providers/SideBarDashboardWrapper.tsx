@@ -16,6 +16,8 @@ import {
   Search,
   Settings,
   FolderKanban,
+  Coins,
+  BadgeIndianRupee,
 } from "lucide-react";
 import { authService } from "@/services/auth.service";
 import { chatService } from "@/services/chat.service";
@@ -43,6 +45,12 @@ const SideBarDashboardWrapper = ({ children }: SideBarDashboardWrapperProps) => 
   const [hasMore, setHasMore] = useState(false);
   const [loadingInitial, setLoadingInitial] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
+  const [entitlement, setEntitlement] = useState<{
+    freeProjectsIncluded: number;
+    projectsCreated: number;
+    paidCreditsRemaining: number;
+    remainingProjects: number;
+  } | null>(null);
 
   const router = useRouter();
   const pathname = usePathname();
@@ -98,16 +106,24 @@ const SideBarDashboardWrapper = ({ children }: SideBarDashboardWrapperProps) => 
       setHasMore(false);
 
       try {
+        const usage = await chatService.getEntitlement();
         const response = await chatService.listSessionSummaries({
           search: debouncedSearch || undefined,
           limit: PAGE_SIZE,
           page: 1,
         });
 
+        setEntitlement({
+          freeProjectsIncluded: usage.freeProjectsIncluded,
+          projectsCreated: usage.projectsCreated,
+          paidCreditsRemaining: usage.paidCreditsRemaining,
+          remainingProjects: usage.remainingProjects,
+        });
         setChatHistory(response.items);
         setHasMore(response.hasMore);
       } catch (error) {
         console.error("Failed to load chat summaries", error);
+        setEntitlement(null);
         setChatHistory([]);
         setHasMore(false);
       } finally {
@@ -315,12 +331,56 @@ const SideBarDashboardWrapper = ({ children }: SideBarDashboardWrapperProps) => 
             <FolderKanban size={16} className="shrink-0" />
             {!collapsed && <span>Projects</span>}
           </button>
+          <button
+            onClick={() => {
+              setMobileOpen(false);
+              router.push("/dashboard/plans");
+            }}
+            className={`
+              mt-2 h-10 rounded-lg border font-medium
+              transition-all duration-200 flex items-center justify-center gap-2 text-sm
+              w-full
+              ${
+                pathname.startsWith("/dashboard/plans")
+                  ? "border-[#0B04CF]/30 bg-[#0B04CF]/5 text-[#0B04CF]"
+                  : "border-gray-200 bg-white text-gray-700 hover:border-[#0B04CF]/40 hover:text-[#0B04CF]"
+              }
+            `}
+          >
+            <BadgeIndianRupee size={16} className="shrink-0" />
+            {!collapsed && <span>Buy Credits</span>}
+          </button>
         </div>
 
         {/* Expanded sidebar: search + chat list */}
         {!collapsed && (
           <div className="flex-1 overflow-y-auto overflow-x-hidden">
             <div className="p-3">
+              <div className="mb-3 rounded-xl border border-[#D8D5E2] bg-gradient-to-r from-[#F6F5FF] to-[#F2F7FF] p-3">
+                <div className="flex items-center gap-2 mb-2">
+                  <Coins size={14} className="text-[#0B04CF]" />
+                  <p className="text-xs font-semibold uppercase tracking-wide text-[#0B04CF]">Usage</p>
+                </div>
+                <div className="grid grid-cols-2 gap-2 text-xs">
+                  <div className="rounded-lg bg-white/80 border border-[#E5E7EB] px-2 py-1.5">
+                    <p className="text-gray-500">Projects used</p>
+                    <p className="font-semibold text-gray-900">{entitlement?.projectsCreated ?? 0}</p>
+                  </div>
+                  <div className="rounded-lg bg-white/80 border border-[#E5E7EB] px-2 py-1.5">
+                    <p className="text-gray-500">Tokens left</p>
+                    <p className="font-semibold text-gray-900">{entitlement?.remainingProjects ?? 0}</p>
+                  </div>
+                  <div className="rounded-lg bg-white/80 border border-[#E5E7EB] px-2 py-1.5">
+                    <p className="text-gray-500">Free quota</p>
+                    <p className="font-semibold text-gray-900">{entitlement?.freeProjectsIncluded ?? 1}</p>
+                  </div>
+                  <div className="rounded-lg bg-white/80 border border-[#E5E7EB] px-2 py-1.5">
+                    <p className="text-gray-500">Paid tokens</p>
+                    <p className="font-semibold text-gray-900">{entitlement?.paidCreditsRemaining ?? user.projectCredits ?? 0}</p>
+                  </div>
+                </div>
+              </div>
+
               <div className="relative mb-3">
                 <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
                 <input

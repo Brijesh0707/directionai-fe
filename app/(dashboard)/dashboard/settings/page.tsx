@@ -12,8 +12,10 @@ const SettingsPage = () => {
   const [notifications, setNotifications] = useState(true);
   const [loggingOut, setLoggingOut] = useState(false);
   const refreshToken = useAppSelector((state) => state.auth.refreshToken);
+  const user = useAppSelector((state) => state.auth.user);
   const dispatch = useAppDispatch();
   const router = useRouter();
+  const [planNotice, setPlanNotice] = useState("");
 
   const handleLogout = async () => {
     try {
@@ -30,6 +32,10 @@ const SettingsPage = () => {
     }
   };
 
+  const handleBuy = async (planCode: "PROJECT_20" | "PROJECT_30") => {
+    setPlanNotice(`Razorpay coming soon for ${planCode}. Tokens are not updated yet.`);
+  };
+
   return (
     <SideBarDashboardWrapper>
       <section className="min-h-screen bg-background p-6 sm:p-10">
@@ -38,6 +44,22 @@ const SettingsPage = () => {
           <p className="mt-2 text-muted-foreground">Manage your account preferences.</p>
 
           <div className="mt-8 space-y-4">
+            <div className="rounded-2xl border border-border bg-card p-5">
+              <p className="font-semibold text-foreground">Project Plan</p>
+              <p className="text-sm text-muted-foreground mt-1">
+                Plan: {user?.planTier ?? "free"} | Remaining paid credits: {user?.projectCredits ?? 0}
+              </p>
+              <div className="mt-4 flex flex-wrap gap-3">
+                <button onClick={() => void handleBuy("PROJECT_20")} className="h-9 px-4 rounded-xl bg-primary text-white text-sm font-semibold">
+                  Buy Now (20)
+                </button>
+                <button onClick={() => void handleBuy("PROJECT_30")} className="h-9 px-4 rounded-xl border border-border text-foreground text-sm font-semibold">
+                  Buy Now (30)
+                </button>
+              </div>
+              {planNotice && <p className="mt-3 text-xs text-amber-600 font-medium">{planNotice}</p>}
+            </div>
+
             <div className="rounded-2xl border border-border bg-card p-5 flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <Bell size={18} className="text-primary" />
@@ -96,4 +118,3 @@ const SettingsPage = () => {
 };
 
 export default SettingsPage;
-

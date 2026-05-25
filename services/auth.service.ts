@@ -1,5 +1,5 @@
 import api from './api';
-import { AuthResponse, User } from '@/types/auth';
+import { AuthResponse, PlansResponse, User } from '@/types/auth';
 
 export type RegisterInput = { email: string; password: string; name?: string };
 export type LoginInput = { email: string; password: string };
@@ -38,6 +38,16 @@ export const authService = {
   logout: async (refreshToken: string) => {
     const { data } = await api.post<{ success: boolean; message: string }>('/auth/logout', {
       refreshToken,
+    });
+    return data;
+  },
+  getPlans: async () => {
+    const { data } = await api.get<PlansResponse>('/auth/plans');
+    return data;
+  },
+  purchasePlan: async (planCode: 'PROJECT_20' | 'PROJECT_30') => {
+    const { data } = await api.post<{ message: string; user: User }>('/auth/plans/purchase', {
+      planCode,
     });
     return data;
   },

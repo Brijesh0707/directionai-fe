@@ -1,5 +1,11 @@
 import api from './api';
-import { ChatReport, ChatSession, ChatSessionSummaryResponse, ChatUsageResponse } from '@/types/chat';
+import {
+  ChatReport,
+  ChatSession,
+  ChatSessionSummaryResponse,
+  ChatUsageResponse,
+  ProjectEntitlement,
+} from '@/types/chat';
 
 const baseURL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3000';
 
@@ -11,6 +17,11 @@ export const chatService = {
 
   async listSessions() {
     const { data } = await api.get<ChatSession[]>('/chat/sessions');
+    return data;
+  },
+
+  async getEntitlement() {
+    const { data } = await api.get<ProjectEntitlement>('/chat/entitlement');
     return data;
   },
 

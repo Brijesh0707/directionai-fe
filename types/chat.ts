@@ -122,3 +122,13 @@ export type ChatUsageResponse = {
   aiCalls: AiCallUsage[];
   tavilyUsages: TavilyUsage[];
 };
+
+export type ProjectEntitlement = {
+  planTier: 'free' | 'project_bundle';
+  freeProjectsIncluded: number;
+  projectsCreated: number;
+  paidCreditsRemaining: number;
+  remainingProjects: number;
+  canCreateProject: boolean;
+  note: string;
+};

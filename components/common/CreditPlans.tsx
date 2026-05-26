@@ -20,7 +20,7 @@ const plans = [
     name: "Growth 20",
     price: "₹500",
     description: "Great for founders validating ideas every week.",
-    features: ["20 Project Credits", "₹25 / Project", "All 4 Agents Included", "Priority Queue"],
+    features: ["20 Project Credits", "All 4 Agents Included", "Priority Queue"],
     cta: "Buy Credits",
     popular: true,
   },
@@ -28,7 +28,7 @@ const plans = [
     name: "Scale 30",
     price: "₹750",
     description: "Built for agencies and high-throughput execution teams.",
-    features: ["30 Project Credits", "₹25 / Project", "All 4 Agents Included", "Team-Friendly Throughput"],
+    features: ["30 Project Credits", "All 4 Agents Included", "Team-Friendly Throughput"],
     cta: "Buy Credits",
     popular: false,
   },
@@ -38,11 +38,8 @@ const CreditPlans = ({ compact = false }: CreditPlansProps) => {
   const [notice, setNotice] = React.useState("");
 
   return (
-    <section className="relative overflow-hidden">
-      <div className="absolute -top-20 -left-20 w-64 h-64 bg-[#0B04CF]/10 blur-3xl rounded-full" />
-      <div className="absolute -bottom-20 -right-20 w-72 h-72 bg-cyan-300/20 blur-3xl rounded-full" />
-
-      <div className="relative z-10">
+    <section className="w-full">
+      <div className="w-full">
         <div className={`text-center max-w-3xl mx-auto ${compact ? "mb-10" : "mb-14"}`}>
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-border bg-card shadow-sm mb-5">
             <Sparkles size={15} className="text-primary" />
@@ -51,23 +48,20 @@ const CreditPlans = ({ compact = false }: CreditPlansProps) => {
           <h2 className={`${compact ? "text-3xl sm:text-4xl" : "text-4xl sm:text-5xl"} font-extrabold tracking-tight text-foreground`}>
             Choose Your Credits
           </h2>
-          <p className="mt-4 text-base sm:text-lg text-muted-foreground">
-            Transparent model: ₹20 cost + ₹5 margin = ₹25 per project.
-          </p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-7 items-stretch">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-7 items-stretch w-full">
           {plans.map((plan) => (
-            <article
+            <div
               key={plan.name}
-              className={`relative rounded-3xl border bg-white/85 backdrop-blur-xl p-7 sm:p-8 transition-all duration-300 hover:-translate-y-1 ${
+              className={`rounded-3xl border bg-white/85 backdrop-blur-xl p-7 sm:p-8 transition-all duration-300 ${
                 plan.popular
                   ? "border-[#0B04CF] shadow-[0_20px_60px_rgba(11,4,207,0.18)]"
                   : "border-gray-200 hover:border-[#0B04CF]/40 shadow-[0_12px_40px_rgba(15,23,42,0.08)]"
               }`}
             >
               {plan.popular && (
-                <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider text-white bg-gradient-to-r from-[#0B04CF] to-[#1208E8]">
+                <div className="mb-4 inline-block px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider text-white bg-gradient-to-r from-[#0B04CF] to-[#1208E8]">
                   Most Popular
                 </div>
               )}
@@ -100,7 +94,7 @@ const CreditPlans = ({ compact = false }: CreditPlansProps) => {
               >
                 {plan.cta}
               </button>
-            </article>
+            </div>
           ))}
         </div>
 
@@ -111,4 +105,3 @@ const CreditPlans = ({ compact = false }: CreditPlansProps) => {
 };
 
 export default CreditPlans;
-

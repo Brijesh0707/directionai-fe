@@ -132,7 +132,7 @@ const handlePrint = () => {
         aria-label="Close report drawer"
       />
       <aside
-        className={`absolute left-0 right-0 bottom-0 top-auto h-[100dvh] w-full border-t border-border bg-card shadow-2xl p-0 overflow-y-auto transition-transform duration-300 ease-out md:left-auto md:right-0 md:top-0 md:bottom-auto md:h-full md:w-[64vw] md:border-t-0 md:border-l md:p-6 ${
+        className={`absolute left-0 right-0 bottom-0 top-auto h-[100dvh] w-[100vw] border-t border-border bg-card shadow-2xl p-0 overflow-y-auto transition-transform duration-300 ease-out md:left-auto md:right-0 md:top-0 md:bottom-auto md:h-full md:w-[100vw] md:border-t-0 md:border-l md:p-6 ${
           isVisible
             ? "translate-y-0 md:translate-y-0 md:translate-x-0"
             : "translate-y-full md:translate-y-0 md:translate-x-full"

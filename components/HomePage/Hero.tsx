@@ -22,14 +22,6 @@ const Hero = () => {
           {/* LEFT CONTENT */}
           <div className="relative z-10">
 
-            {/* BADGE */}
-            <div className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-4 py-2 mb-7 shadow-sm">
-              <Sparkles size={16} className="text-primary" />
-              
-              <span className="text-sm font-medium text-muted-foreground">
-                AI-powered startup execution platform
-              </span>
-            </div>
 
             {/* HEADING */}
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold leading-[1.05] tracking-tight text-foreground max-w-2xl">
@@ -65,17 +57,7 @@ const Hero = () => {
               </button>
             </div>
 
-            {/* BOTTOM TEXT */}
-            <div className="mt-8 flex items-center gap-3 text-muted-foreground">
-              
-              <div className="w-6 h-6 rounded-full border border-primary/20 bg-primary/10 flex items-center justify-center">
-                <Sparkles size={12} className="text-primary" />
-              </div>
 
-              <p className="text-sm font-medium">
-                No product expertise required.
-              </p>
-            </div>
           </div>
 
           {/* RIGHT SIDE UI MOCKUP */}

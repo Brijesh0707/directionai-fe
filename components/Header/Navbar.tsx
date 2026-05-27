@@ -12,7 +12,6 @@ const navItems = [
   { name: "Pricing", href: "/#pricing" },
   { name: "Privacy", href: "/privacy-policy" },
   { name: "Terms", href: "/terms-and-conditions" },
-  { name: "Dashboard", href: "/dashboard" },
 ];
 
 const Navbar = () => {
@@ -31,8 +30,8 @@ const Navbar = () => {
   };
 
   return (
-    <header className="w-full sticky top-0 z-50 px-3 sm:px-5 pt-3">
-      <nav className="glass-card rounded-2xl border border-border px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between shadow-sm">
+    <header className="w-full sticky top-0 z-50">
+      <nav className="glass-card border border-bordr px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between shadow-sm">
         
         {/* LEFT */}
         <Link href="/" className="flex items-center gap-3">

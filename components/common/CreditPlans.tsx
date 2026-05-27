@@ -42,7 +42,6 @@ const CreditPlans = ({ compact = false }: CreditPlansProps) => {
       <div className="w-full">
         <div className={`text-center max-w-3xl mx-auto ${compact ? "mb-10" : "mb-14"}`}>
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-border bg-card shadow-sm mb-5">
-            <Sparkles size={15} className="text-primary" />
             <span className="text-sm font-medium text-muted-foreground">Credit Plans</span>
           </div>
           <h2 className={`${compact ? "text-3xl sm:text-4xl" : "text-4xl sm:text-5xl"} font-extrabold tracking-tight text-foreground`}>

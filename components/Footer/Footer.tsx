@@ -70,42 +70,6 @@ const Footer = () => {
             </div>
           </div>
 
-          {/* RESOURCES */}
-          <div>
-            <h3 className="text-sm font-extrabold tracking-[0.2em] text-foreground uppercase mb-6">
-              Resources
-            </h3>
-
-            <div className="flex flex-col gap-4">
-              <Link
-                href="/privacy-policy"
-                className="text-muted-foreground hover:text-primary transition-colors text-base"
-              >
-                Privacy Policy
-              </Link>
-
-              <Link
-                href="/terms-and-conditions"
-                className="text-muted-foreground hover:text-primary transition-colors text-base"
-              >
-                Terms & Conditions
-              </Link>
-
-              <Link
-                href="/dashboard"
-                className="text-muted-foreground hover:text-primary transition-colors text-base"
-              >
-                Start Building
-              </Link>
-
-              <Link
-                href="/login"
-                className="text-muted-foreground hover:text-primary transition-colors text-base"
-              >
-                Login
-              </Link>
-            </div>
-          </div>
 
           {/* LEGAL */}
           <div>
@@ -127,13 +91,6 @@ const Footer = () => {
               >
                 Terms of Service
               </Link>
-
-              <Link
-                href="/dashboard/settings"
-                className="text-muted-foreground hover:text-primary transition-colors text-base"
-              >
-                Settings
-              </Link>
             </div>
           </div>
         </div>
@@ -143,7 +100,7 @@ const Footer = () => {
 
           {/* COPYRIGHT */}
           <p className="text-sm text-muted-foreground text-center md:text-left">
-            © 2024 Direction AI. All rights reserved.
+            © 2026 Direction AI. All rights reserved.
           </p>
 
           {/* SOCIALS */}

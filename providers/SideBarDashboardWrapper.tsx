@@ -356,7 +356,7 @@ const SideBarDashboardWrapper = ({ children }: SideBarDashboardWrapperProps) => 
         {!collapsed && (
           <div className="flex-1 overflow-y-auto overflow-x-hidden">
             <div className="p-3">
-              <div className="mb-3 rounded-xl border border-[#D8D5E2] bg-gradient-to-r from-[#F6F5FF] to-[#F2F7FF] p-3">
+              {/* <div className="mb-3 rounded-xl border border-[#D8D5E2] bg-gradient-to-r from-[#F6F5FF] to-[#F2F7FF] p-3">
                 <div className="flex items-center gap-2 mb-2">
                   <Coins size={14} className="text-[#0B04CF]" />
                   <p className="text-xs font-semibold uppercase tracking-wide text-[#0B04CF]">Usage</p>
@@ -379,7 +379,7 @@ const SideBarDashboardWrapper = ({ children }: SideBarDashboardWrapperProps) => 
                     <p className="font-semibold text-gray-900">{entitlement?.paidCreditsRemaining ?? user.projectCredits ?? 0}</p>
                   </div>
                 </div>
-              </div>
+              </div> */}
 
               <div className="relative mb-3">
                 <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />

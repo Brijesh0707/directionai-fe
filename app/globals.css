@@ -104,6 +104,18 @@ body {
   min-height: 100vh;
 }
 
+
+/* Hide scrollbar but keep scrolling enabled */
+.scroll-hidden {
+  overflow: auto;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+}
+
+.scroll-hidden::-webkit-scrollbar {
+  display: none; /* Chrome, Safari */
+}
+
 /* =========================
    Custom Utility Classes
 ========================== */

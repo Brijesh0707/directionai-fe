@@ -8,6 +8,7 @@ import { authService } from "@/services/auth.service";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { setSession } from "@/store/authSlice";
 import AppLoadingScreen from "@/components/common/AppLoadingScreen";
+import Image from "next/image";
 
 type GoogleCredentialResponse = { credential?: string };
 type PromptMomentNotification = {
@@ -183,86 +184,93 @@ const LoginScreen = () => {
   };
 
   return (
-    <section className="min-h-screen bg-background overflow-hidden m-4">
+    <section className="min-h-screen bg-background overflow-hidden">
       {loading && <AppLoadingScreen label="Authenticating..." />}
 
       <div className="grid grid-cols-1 lg:grid-cols-2 min-h-screen">
-        <div className="relative hidden lg:flex overflow-hidden border-r border-border">
-          <div
-            className="absolute inset-0 opacity-[0.6]"
-            style={{
-              backgroundImage: `
-                linear-gradient(to right, rgba(11,4,207,0.06) 1px, transparent 1px),
-                linear-gradient(to bottom, rgba(11,4,207,0.06) 1px, transparent 1px)
-              `,
-              backgroundSize: "40px 40px",
-            }}
+        {/* Left Side - 60% primary theme color */}
+ {/* Left Side - Grid Background */}
+<div className="relative hidden lg:flex overflow-hidden border-r border-border bg-background">
+  {/* Grid Layer */}
+  <div
+    className="absolute inset-0"
+    style={{
+      backgroundImage: `
+        linear-gradient(to right, rgba(99,102,241,0.08) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(99,102,241,0.08) 1px, transparent 1px)
+      `,
+      backgroundSize: "32px 32px",
+    }}
+  />
+
+  {/* Brand Primary Overlay */}
+  <div className="absolute inset-0 bg-primary/05" />
+
+  {/* Soft Gradient Glow */}
+  <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-primary/5" />
+
+  <div className="relative z-10 flex flex-col justify-between w-full p-10">
+    <div className="absolute inset-0 pointer-events-none">
+      
+      {/* Center Logo Circle */}
+      <div className="absolute top-[16%] left-1/2 -translate-x-1/2 w-[170px] h-[170px] rounded-full bg-white shadow-2xl border border-primary/10 flex items-center justify-center animate-[float_6s_ease-in-out_infinite]">
+        <BrainCircuit className="w-12 h-12 text-primary" strokeWidth={1.8} />
+      </div>
+
+      {/* Investor Deck Card */}
+      <div className="absolute top-[18%] right-14 w-[220px] rounded-2xl bg-white shadow-2xl border border-primary/10 p-3 animate-[float_7s_ease-in-out_infinite]">
+        <div className="h-[110px] rounded-xl overflow-hidden">
+          <img
+            src="https://images.unsplash.com/photo-1590097520505-416422f07ad1?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+            alt="Investor Deck"
+            className="w-full h-full object-cover"
           />
-          <div className="absolute top-[-120px] left-[-120px] w-[300px] h-[300px] bg-primary/10 blur-3xl rounded-full" />
-          <div className="relative z-10 flex flex-col justify-between w-full p-10">
-            <div className="absolute inset-0 pointer-events-none">
-              <div className="absolute top-8 left-1/2 -translate-x-1/2 glass-card rounded-2xl border border-border p-5 w-[220px] rotate-2 shadow-2xl animate-[float_6s_ease-in-out_infinite]">
-                <div className="flex items-center gap-2 mb-4">
-                  <div className="w-3 h-3 rounded-full bg-primary" />
-                  <div className="text-xs font-bold text-muted-foreground">PRD_GEN_01</div>
-                </div>
-                <div className="space-y-3">
-                  <div className="h-3 rounded-full bg-border w-full" />
-                  <div className="h-3 rounded-full bg-border w-[80%]" />
-                  <div className="h-3 rounded-full bg-border w-[65%]" />
-                </div>
-              </div>
-
-              <div className="absolute top-1/2 left-[28%] -translate-y-1/2 w-40 h-40 rounded-full bg-card border border-border shadow-2xl flex items-center justify-center animate-pulse">
-                <div className="w-24 h-24 rounded-full gradient-primary flex items-center justify-center shadow-xl">
-                  <BrainCircuit size={40} className="text-white" />
-                </div>
-              </div>
-
-              <div className="absolute top-[26%] right-12 glass-card rounded-2xl border border-border p-4 w-[180px] shadow-xl animate-[float_7s_ease-in-out_infinite]">
-                <div className="rounded-xl overflow-hidden h-20 gradient-primary mb-4 opacity-90" />
-                <p className="text-sm font-semibold text-foreground">Investor Deck v2.4</p>
-              </div>
-
-              <div className="absolute bottom-[32%] left-8 glass-card rounded-2xl border border-border p-4 w-[240px] shadow-xl animate-[float_8s_ease-in-out_infinite]">
-                <p className="text-xs font-bold text-primary uppercase tracking-wide mb-3">Product Roadmap</p>
-                <div className="flex gap-2">
-                  <div className="h-8 rounded-lg gradient-primary w-[70%]" />
-                  <div className="h-8 rounded-lg bg-border w-[30%]" />
-                </div>
-              </div>
-            </div>
-
-            <div className="relative z-10 max-w-xl">
-              <h2 className="text-6xl font-extrabold leading-[1.05] tracking-tight text-primary">
-                Turn Raw Startup Ideas
-                Into Structured Execution
-              </h2>
-
-              <div className="mt-10 flex flex-wrap gap-3">
-                {tags.map((tag, index) => (
-                  <div
-                    key={index}
-                    className="px-4 py-2 rounded-xl bg-card border border-border text-sm font-semibold text-muted-foreground shadow-sm"
-                  >
-                    {tag}
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
         </div>
 
-        <div className="relative flex items-center justify-center p-5 sm:p-8 lg:p-12">
-          <div className="absolute top-[-100px] right-[-100px] w-[300px] h-[300px] bg-primary/10 blur-3xl rounded-full" />
+        <p className="text-[11px] font-semibold text-gray-600 mt-2">
+          Investor Deck v2.4
+        </p>
+      </div>
 
+      {/* Product Roadmap Card */}
+      <div className="absolute bottom-[45%] left-10 w-[260px] rounded-2xl bg-white shadow-2xl border border-primary/10 p-4 animate-[float_8s_ease-in-out_infinite]">
+        <p className="text-[11px] font-bold tracking-wide text-primary uppercase mb-3">
+          Product Roadmap
+        </p>
+
+        <div className="flex gap-2">
+          <div className="h-7 flex-1 rounded bg-primary" />
+          <div className="h-7 w-16 rounded bg-primary/20" />
+        </div>
+      </div>
+    </div>
+
+    {/* Bottom Content */}
+    <div className="relative z-10 mt-auto mb-10 max-w-[520px]">
+      <h1 className="text-[52px] leading-[1.05] font-extrabold tracking-tight text-primary">
+        Turn Raw Startup Ideas Into Structured Execution
+      </h1>
+
+      <div className="flex flex-wrap gap-3 mt-8">
+        {tags.map((tag, index) => (
+          <div
+            key={index}
+            className="px-4 py-2 rounded-xl bg-white/80 backdrop-blur-md border border-primary/10 text-sm font-medium text-gray-700 shadow-sm"
+          >
+            {tag}
+          </div>
+        ))}
+      </div>
+    </div>
+  </div>
+</div>
+
+        {/* Right Side - Login Form */}
+        <div className="relative flex items-center justify-center p-5 sm:p-8 lg:p-12">
           <div className="relative z-10 w-full max-w-[520px] rounded-[36px] border border-border bg-card/90 backdrop-blur-xl shadow-2xl p-7 sm:p-10">
             <div>
               <p className="text-sm font-semibold text-primary mb-3">Welcome to Direction AI</p>
               <h3 className="text-4xl font-extrabold tracking-tight text-foreground leading-tight">Build Smarter With AI</h3>
-              <p className="mt-5 text-lg leading-8 text-muted-foreground">
-                Log in to access your startup OS and accelerate your journey from idea to IPO.
-              </p>
             </div>
 
             <div className="mt-10 flex border-b border-border">
@@ -348,15 +356,6 @@ const LoginScreen = () => {
                 </svg>
                 Google
               </button>
-            </div>
-
-            <div className="mt-10 pt-8 border-t border-border flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-muted-foreground">
-              <div className="flex items-center gap-2">
-                <Lock size={14} /> Secure authentication
-              </div>
-              <div className="flex items-center gap-2">
-                <Sparkles size={14} /> AI-powered workspace
-              </div>
             </div>
           </div>
         </div>

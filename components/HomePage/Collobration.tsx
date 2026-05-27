@@ -8,7 +8,7 @@ import {
 
 const collaborationPoints = [
   "Real-time AI editing & refinement",
-  "Export to Notion, PDF, or Markdown",
+  "Export to PDF",
   "Invite developers for immediate handoff",
 ];
 

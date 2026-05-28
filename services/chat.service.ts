@@ -4,6 +4,7 @@ import {
   ChatSession,
   ChatSessionSummaryResponse,
   ChatUsageResponse,
+  DirectionAiReplyResponse,
   ProjectEntitlement,
 } from '@/types/chat';
 
@@ -39,6 +40,13 @@ export const chatService = {
 
   async runAgents(chatId: string, agentTypes: string[]) {
     const { data } = await api.post<ChatSession>(`/chat/sessions/${chatId}/run`, { agentTypes });
+    return data;
+  },
+
+  async sendMessage(chatId: string, message: string) {
+    const { data } = await api.post<DirectionAiReplyResponse>(`/chat/sessions/${chatId}/message`, {
+      message,
+    });
     return data;
   },
 

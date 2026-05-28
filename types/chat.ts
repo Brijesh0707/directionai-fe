@@ -17,11 +17,41 @@ export type AgentRun = {
   updatedAt: string;
 };
 
+export type DirectionAiConversationItem = {
+  role: 'user' | 'assistant';
+  kind: 'intake' | 'clarification' | 'recommendation' | 'reply' | 'summary';
+  content: string;
+  createdAt: string;
+};
+
+export type DirectionAiMemory = {
+  rawIdea?: string;
+  project: {
+    name: string;
+    category: string;
+    description: string;
+    businessType?: string;
+    audience?: string;
+    objective?: string;
+    recommendedFirstAgent?: string;
+    recommendationReason?: string;
+    confidence?: number;
+  };
+  conversation: DirectionAiConversationItem[];
+  pendingQuestions: string[];
+  agentSummaries: Record<string, string>;
+  lastUpdatedAt: string;
+};
+
 export type ChatSession = {
   id: string;
   userId: string;
+  rawIdea?: string | null;
   title: string;
   idea: string;
+  projectCategory?: string | null;
+  recommendedFirstAgent?: string | null;
+  memoryJson?: DirectionAiMemory | null;
   status: ChatSessionStatus;
   progress: number;
   createdAt: string;
@@ -47,6 +77,11 @@ export type ChatReport = {
   hasDownload: boolean;
   hasJson: boolean;
   createdAt: string;
+};
+
+export type DirectionAiReplyResponse = {
+  message: string;
+  session: ChatSession;
 };
 
 export type ChatSessionSummary = {

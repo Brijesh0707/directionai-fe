@@ -24,13 +24,11 @@ import { chatService } from "@/services/chat.service";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { clearSession } from "@/store/authSlice";
 import AppLoadingScreen from "@/components/common/AppLoadingScreen";
-import { ChatSessionSummary } from "@/types/chat";
+import { ChatSession, ChatSessionSummary } from "@/types/chat";
 
 interface SideBarDashboardWrapperProps {
   children: React.ReactNode;
 }
-
-const PAGE_SIZE = 12;
 
 const SideBarDashboardWrapper = ({ children }: SideBarDashboardWrapperProps) => {
   const [collapsed, setCollapsed] = useState(false);
@@ -41,10 +39,7 @@ const SideBarDashboardWrapper = ({ children }: SideBarDashboardWrapperProps) => 
   const [debouncedSearch, setDebouncedSearch] = useState("");
 
   const [chatHistory, setChatHistory] = useState<ChatSessionSummary[]>([]);
-  const [page, setPage] = useState(1);
-  const [hasMore, setHasMore] = useState(false);
   const [loadingInitial, setLoadingInitial] = useState(true);
-  const [loadingMore, setLoadingMore] = useState(false);
   const [entitlement, setEntitlement] = useState<{
     freeProjectsIncluded: number;
     projectsCreated: number;
@@ -59,8 +54,6 @@ const SideBarDashboardWrapper = ({ children }: SideBarDashboardWrapperProps) => 
   const accessToken = useAppSelector((state) => state.auth.accessToken);
   const refreshToken = useAppSelector((state) => state.auth.refreshToken);
   const userMenuRef = useRef<HTMLDivElement>(null);
-  const loadMoreRef = useRef<HTMLDivElement | null>(null);
-
   useEffect(() => {
     const handleResize = () => {
       if (window.innerWidth >= 1024 && mobileOpen) {
@@ -102,16 +95,10 @@ const SideBarDashboardWrapper = ({ children }: SideBarDashboardWrapperProps) => 
   useEffect(() => {
     const loadFirstPage = async () => {
       setLoadingInitial(true);
-      setPage(1);
-      setHasMore(false);
 
       try {
         const usage = await chatService.getEntitlement();
-        const response = await chatService.listSessionSummaries({
-          search: debouncedSearch || undefined,
-          limit: PAGE_SIZE,
-          page: 1,
-        });
+        const sessions = await chatService.listSessions();
 
         setEntitlement({
           freeProjectsIncluded: usage.freeProjectsIncluded,
@@ -119,13 +106,25 @@ const SideBarDashboardWrapper = ({ children }: SideBarDashboardWrapperProps) => 
           paidCreditsRemaining: usage.paidCreditsRemaining,
           remainingProjects: usage.remainingProjects,
         });
-        setChatHistory(response.items);
-        setHasMore(response.hasMore);
+        const summaries = sessions.map((session: ChatSession) => ({
+          id: session.id,
+          title: session.title,
+          description: session.idea.slice(0, 180),
+          createdAt: session.createdAt,
+        }));
+
+        const filtered = debouncedSearch
+          ? summaries.filter((item) => {
+              const haystack = `${item.title} ${item.description}`.toLowerCase();
+              return haystack.includes(debouncedSearch.toLowerCase());
+            })
+          : summaries;
+
+        setChatHistory(filtered);
       } catch (error) {
         console.error("Failed to load chat summaries", error);
         setEntitlement(null);
         setChatHistory([]);
-        setHasMore(false);
       } finally {
         setLoadingInitial(false);
       }
@@ -133,47 +132,6 @@ const SideBarDashboardWrapper = ({ children }: SideBarDashboardWrapperProps) => 
 
     void loadFirstPage();
   }, [debouncedSearch]);
-
-  useEffect(() => {
-    if (collapsed || loadingInitial || loadingMore || !hasMore) return;
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const entry = entries[0];
-        if (!entry?.isIntersecting) return;
-
-        setLoadingMore(true);
-
-        void (async () => {
-          try {
-            const nextPage = page + 1;
-            const response = await chatService.listSessionSummaries({
-              search: debouncedSearch || undefined,
-              limit: PAGE_SIZE,
-              page: nextPage,
-            });
-
-            setChatHistory((prev) => [...prev, ...response.items]);
-            setPage(nextPage);
-            setHasMore(response.hasMore);
-          } catch (error) {
-            console.error("Failed to load more chat summaries", error);
-          } finally {
-            setLoadingMore(false);
-          }
-        })();
-      },
-      { rootMargin: "200px" },
-    );
-
-    const current = loadMoreRef.current;
-    if (current) observer.observe(current);
-
-    return () => {
-      if (current) observer.unobserve(current);
-      observer.disconnect();
-    };
-  }, [collapsed, debouncedSearch, hasMore, loadingInitial, loadingMore, page]);
 
   const handleLogout = async () => {
     try {
@@ -210,6 +168,8 @@ const SideBarDashboardWrapper = ({ children }: SideBarDashboardWrapperProps) => 
   };
 
   const sidebarTitle = useMemo(() => (debouncedSearch ? "Search Results" : "Recent Chats"), [debouncedSearch]);
+  const remainingProjects = entitlement?.remainingProjects ?? user?.projectCredits ?? 0;
+  const isCreditsDepleted = remainingProjects <= 0;
 
   if (!user || !accessToken) {
     return <AppLoadingScreen label="Checking session..." />;
@@ -341,14 +301,29 @@ const SideBarDashboardWrapper = ({ children }: SideBarDashboardWrapperProps) => 
               transition-all duration-200 flex items-center justify-center gap-2 text-sm
               w-full
               ${
-                pathname.startsWith("/dashboard/plans")
+                isCreditsDepleted
+                  ? "border-amber-300 bg-amber-50 text-amber-800 hover:border-amber-400 hover:bg-amber-100"
+                  : pathname.startsWith("/dashboard/plans")
                   ? "border-[#0B04CF]/30 bg-[#0B04CF]/5 text-[#0B04CF]"
                   : "border-gray-200 bg-white text-gray-700 hover:border-[#0B04CF]/40 hover:text-[#0B04CF]"
               }
             `}
           >
             <BadgeIndianRupee size={16} className="shrink-0" />
-            {!collapsed && <span>Buy Credits</span>}
+            {!collapsed && (
+              <span className="flex items-center gap-2">
+                <span>Buy Credits</span>
+                <span
+                  className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${
+                    isCreditsDepleted
+                      ? "bg-amber-200 text-amber-900"
+                      : "bg-gray-100 text-gray-600"
+                  }`}
+                >
+                  Left {remainingProjects}
+                </span>
+              </span>
+            )}
           </button>
         </div>
 
@@ -368,7 +343,7 @@ const SideBarDashboardWrapper = ({ children }: SideBarDashboardWrapperProps) => 
                   </div>
                   <div className="rounded-lg bg-white/80 border border-[#E5E7EB] px-2 py-1.5">
                     <p className="text-gray-500">Tokens left</p>
-                    <p className="font-semibold text-gray-900">{entitlement?.remainingProjects ?? 0}</p>
+                    <p className="font-semibold text-gray-900">{remainingProjects}</p>
                   </div>
                   <div className="rounded-lg bg-white/80 border border-[#E5E7EB] px-2 py-1.5">
                     <p className="text-gray-500">Free quota</p>
@@ -452,17 +427,6 @@ const SideBarDashboardWrapper = ({ children }: SideBarDashboardWrapperProps) => 
                   ))
                 )}
 
-                <div ref={loadMoreRef} className="h-1" />
-                {loadingMore && (
-                  <div className="space-y-1">
-                    {Array.from({ length: 2 }).map((_, index) => (
-                      <div key={index} className="rounded-lg border border-gray-100 p-2 animate-pulse">
-                        <div className="h-3 bg-gray-200 rounded w-3/4 mb-2" />
-                        <div className="h-2.5 bg-gray-200 rounded w-full" />
-                      </div>
-                    ))}
-                  </div>
-                )}
               </div>
             </div>
           </div>

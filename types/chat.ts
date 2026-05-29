@@ -51,6 +51,8 @@ export type ChatSession = {
   idea: string;
   projectCategory?: string | null;
   recommendedFirstAgent?: string | null;
+  isPublic?: boolean;
+  publicShareToken?: string | null;
   memoryJson?: DirectionAiMemory | null;
   status: ChatSessionStatus;
   progress: number;
@@ -77,6 +79,9 @@ export type ChatReport = {
   hasDownload: boolean;
   hasJson: boolean;
   createdAt: string;
+  isPublic?: boolean;
+  publicShareToken?: string | null;
+  publicSharePath?: string | null;
 };
 
 export type DirectionAiReplyResponse = {
@@ -166,4 +171,63 @@ export type ProjectEntitlement = {
   remainingProjects: number;
   canCreateProject: boolean;
   note: string;
+};
+
+export type ProjectShareInfo = {
+  chatId: string;
+  title: string;
+  isPublic: boolean;
+  publicShareToken?: string | null;
+  publicSharePath?: string | null;
+  reports: Array<{
+    runId: string;
+    agentType: string;
+    reportName?: string | null;
+    createdAt: string;
+    isPublic?: boolean;
+    publicShareToken?: string | null;
+    publicSharePath?: string | null;
+  }>;
+};
+
+export type ReportShareInfo = {
+  runId: string;
+  isPublic: boolean;
+  publicShareToken?: string | null;
+  publicSharePath?: string | null;
+};
+
+export type PublicProjectResponse = {
+  project: {
+    id: string;
+    title: string;
+    idea: string;
+    projectCategory?: string | null;
+    createdAt: string;
+    updatedAt: string;
+  };
+  reports: Array<{
+    runId: string;
+    agentType: string;
+    reportName?: string | null;
+    createdAt: string;
+    publicShareToken?: string | null;
+    publicSharePath?: string | null;
+  }>;
+};
+
+export type PublicReportResponse = {
+  project: {
+    id: string;
+    title: string;
+    idea: string;
+    projectCategory?: string | null;
+  };
+  report: {
+    runId: string;
+    agentType: string;
+    reportName?: string | null;
+    createdAt: string;
+    resultJson: unknown;
+  };
 };

@@ -6,6 +6,10 @@ import {
   ChatUsageResponse,
   DirectionAiReplyResponse,
   ProjectEntitlement,
+  ReportShareInfo,
+  ProjectShareInfo,
+  PublicProjectResponse,
+  PublicReportResponse,
 } from '@/types/chat';
 
 const baseURL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3000';
@@ -52,6 +56,33 @@ export const chatService = {
 
   async listReports(chatId: string) {
     const { data } = await api.get<ChatReport[]>(`/chat/sessions/${chatId}/reports`);
+    return data;
+  },
+
+  async getProjectShare(chatId: string) {
+    const { data } = await api.get<ProjectShareInfo>(`/share/sessions/${chatId}`);
+    return data;
+  },
+
+  async updateProjectShare(chatId: string, isPublic: boolean) {
+    const { data } = await api.patch<ProjectShareInfo>(`/share/sessions/${chatId}`, { isPublic });
+    return data;
+  },
+
+  async updateReportShare(chatId: string, runId: string, isPublic: boolean) {
+    const { data } = await api.patch<ReportShareInfo>(`/share/sessions/${chatId}/reports/${runId}`, {
+      isPublic,
+    });
+    return data;
+  },
+
+  async getPublicProject(token: string) {
+    const { data } = await api.get<PublicProjectResponse>(`/share/project/${token}`);
+    return data;
+  },
+
+  async getPublicReport(token: string) {
+    const { data } = await api.get<PublicReportResponse>(`/share/report/${token}`);
     return data;
   },
 

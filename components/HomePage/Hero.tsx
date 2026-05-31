@@ -51,10 +51,10 @@ const Hero = () => {
                 Start Building
               </Link>
 
-              <button className="h-14 px-7 rounded-2xl border border-border bg-card text-foreground font-semibold flex items-center gap-3 hover:border-primary hover:text-primary transition-all duration-200 shadow-sm">
+              {/* <button className="h-14 px-7 rounded-2xl border border-border bg-card text-foreground font-semibold flex items-center gap-3 hover:border-primary hover:text-primary transition-all duration-200 shadow-sm">
                 <PlayCircle size={22} />
                 Watch Demo
-              </button>
+              </button> */}
             </div>
 
 

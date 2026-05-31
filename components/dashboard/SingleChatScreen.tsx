@@ -119,7 +119,7 @@ const MarkdownMessage = ({
   </div>
 );
 
-// ─── FIX 4 & 5: Professional inline "thinking" indicator (chat only) ──────────
+// ─── Professional inline "thinking" indicator (chat only) ────────────────────
 const ThinkingIndicator = () => (
   <div className="flex items-center gap-3 py-1">
     <div className="flex items-center gap-1.5">
@@ -135,7 +135,7 @@ const ThinkingIndicator = () => (
   </div>
 );
 
-// ─── FIX 4 & 5: Professional execution progress loader ───────────────────────
+// ─── Professional execution progress loader ───────────────────────────────────
 const ExecutionProgressLoader = ({
   progress,
 }: {
@@ -200,15 +200,7 @@ const ExecutionProgressLoader = ({
   </div>
 );
 
-// ─── FIX 1 & 5: AI message — parse markdown first, then stream revealed ──────
-/**
- * Strategy:
- * - For non-latest or already-complete messages: render markdown immediately.
- * - For the latest message when it first appears (isStreaming=true):
- *   1. Parse markdown to plain revealed text
- *   2. Animate how much of the *markdown source* is shown using a char counter
- *   3. Render ReactMarkdown on the growing substring → no raw-markdown flash
- */
+// ─── AI message — parse markdown first, then stream revealed ─────────────────
 const AIMessage = ({
   content,
   isLatest,
@@ -264,7 +256,6 @@ const AIMessage = ({
 
   return (
     <div className="relative">
-      {/* Always render via ReactMarkdown — no raw markdown flash */}
       <MarkdownMessage content={visibleContent} />
       {!done && <StreamingCursor />}
     </div>
@@ -284,20 +275,19 @@ const SingleChatScreen = ({ chatId }: { chatId: string }) => {
   const [activeReport, setActiveReport] = useState<ChatReport | null>(null);
   const [activeRunData, setActiveRunData] = useState<unknown>(null);
   const [draftMessage, setDraftMessage] = useState("");
-  // FIX 2: single boolean for chat reply loading
   const [sendingMessage, setSendingMessage] = useState(false);
   const [pendingUserMessage, setPendingUserMessage] = useState<string | null>(null);
   const [textareaRows, setTextareaRows] = useState(1);
   const [composerFocused, setComposerFocused] = useState(false);
 
   const bottomRef = useRef<HTMLDivElement | null>(null);
-  // FIX 3: ref to the streaming AI message row
   const streamingMsgRef = useRef<HTMLDivElement | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
   const appliedRecommendedAgentRef = useRef(false);
   const prevSendingRef = useRef(false);
-  // NEW: ref for the last user message to scroll to
   const lastUserMessageRef = useRef<HTMLDivElement | null>(null);
+  // Track whether we've done the initial scroll after first load
+  const initialScrollDoneRef = useRef(false);
 
   const refreshSession = useCallback(async () => {
     try {
@@ -313,6 +303,17 @@ const SingleChatScreen = ({ chatId }: { chatId: string }) => {
   useEffect(() => {
     void refreshSession();
   }, [refreshSession]);
+
+  // ─── FIX: scroll to bottom on initial load, instantly (no animation) ───────
+  useEffect(() => {
+    if (!loading && !initialScrollDoneRef.current) {
+      initialScrollDoneRef.current = true;
+      // Use requestAnimationFrame to wait for the DOM to paint with content
+      requestAnimationFrame(() => {
+        bottomRef.current?.scrollIntoView({ behavior: "instant", block: "end" });
+      });
+    }
+  }, [loading]);
 
   useEffect(() => {
     if (!accessToken) return;
@@ -345,13 +346,12 @@ const SingleChatScreen = ({ chatId }: { chatId: string }) => {
     return () => source.close();
   }, [accessToken, chatId, refreshSession]);
 
-  // FIX 3: scroll to streaming message when it first appears
+  // Scroll to streaming message when reply arrives
   useEffect(() => {
     if (sendingMessage && !prevSendingRef.current) {
-      // just started sending — will scroll once the thinking row mounts
+      // just started sending
     }
     if (!sendingMessage && prevSendingRef.current) {
-      // reply just arrived — scroll to it
       requestAnimationFrame(() => {
         streamingMsgRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
       });
@@ -359,10 +359,9 @@ const SingleChatScreen = ({ chatId }: { chatId: string }) => {
     prevSendingRef.current = sendingMessage;
   }, [sendingMessage]);
 
-  // ✨ NEW: Scroll to user message immediately after sending
+  // Scroll to user message immediately after sending
   useEffect(() => {
     if (pendingUserMessage && !sendingMessage) {
-      // Small delay to ensure DOM has updated with the user message
       requestAnimationFrame(() => {
         lastUserMessageRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
       });
@@ -450,13 +449,16 @@ const SingleChatScreen = ({ chatId }: { chatId: string }) => {
 
   const directionMemory = project?.memoryJson ?? null;
   const conversation = directionMemory?.conversation ?? [];
-  const hasOpenQuestions = (directionMemory?.pendingQuestions?.length ?? 0) > 0;
+  const isClarifying = Boolean(directionMemory?.clarificationNeeded);
+  const hasOpenQuestions =
+    isClarifying && (directionMemory?.pendingQuestions?.length ?? 0) > 0;
   const allAgentsCompleted = options.every((option) =>
     reports.some((report) => report.agentType === option.agentType)
   );
   const canShowAgentSuggestions =
-    !hasOpenQuestions && Boolean(project?.recommendedFirstAgent) && !allAgentsCompleted;
-  const shouldShowClarificationNotice = hasOpenQuestions && !allAgentsCompleted;
+    Boolean(project?.recommendedFirstAgent) && !allAgentsCompleted;
+  const shouldShowClarificationNotice =
+    isClarifying && !allAgentsCompleted && !canShowAgentSuggestions;
   const recommendedAgentTitle =
     options.find((option) => option.agentType === project?.recommendedFirstAgent)?.title ??
     project?.recommendedFirstAgent ??
@@ -589,9 +591,9 @@ const SingleChatScreen = ({ chatId }: { chatId: string }) => {
                 <p className="text-sm sm:text-base text-gray-500 leading-relaxed max-w-2xl">
                   {directionMemory?.project?.description ?? project.idea}
                 </p>
-                {directionMemory?.pendingQuestions?.length ? (
+                {isClarifying ? (
                   <p className="mt-2 text-xs text-amber-600 font-medium">
-                    DirectionAI is asking a few clarifying questions before recommending the first agent.
+                    DirectionAI is still clarifying the brief, but it may already have a first-step recommendation.
                   </p>
                 ) : null}
               </div>
@@ -620,7 +622,6 @@ const SingleChatScreen = ({ chatId }: { chatId: string }) => {
                     );
                   }
 
-                  // AI message — FIX 1: markdown-first streaming
                   return (
                     <div
                       key={`${item.createdAt}-${index}`}
@@ -669,7 +670,7 @@ const SingleChatScreen = ({ chatId }: { chatId: string }) => {
                 </div>
               )}
 
-              {/* FIX 2: single, professional thinking indicator for chat reply */}
+              {/* Thinking indicator for chat reply */}
               {sendingMessage && (
                 <div className="flex justify-start gap-3 msg-enter">
                   <div className="shrink-0 mt-1">
@@ -808,7 +809,7 @@ const SingleChatScreen = ({ chatId }: { chatId: string }) => {
               </div>
             )}
 
-            {/* FIX 2 & 4: execution loading — only shown when running agents, not on chat reply */}
+            {/* Execution loading — only shown when running agents */}
             {running && (
               <div className="mb-5 msg-enter">
                 <ExecutionProgressLoader progress={Math.max(project.progress, 12)} />
@@ -868,7 +869,6 @@ const SingleChatScreen = ({ chatId }: { chatId: string }) => {
         </div>
 
         {/* ── Composer ────────────────────────────────────────────────────────── */}
-        {/* FIX 5: refined focus ring + subtle background lift */}
         <div className="shrink-0">
           <div className="max-w-3xl mx-auto px-4 py-3 sm:px-6">
             <div

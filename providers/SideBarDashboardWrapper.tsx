@@ -31,7 +31,15 @@ interface SideBarDashboardWrapperProps {
 }
 
 const SideBarDashboardWrapper = ({ children }: SideBarDashboardWrapperProps) => {
-  const [collapsed, setCollapsed] = useState(false);
+  // Load collapsed state from localStorage for desktop only
+  const [collapsed, setCollapsed] = useState(() => {
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("sidebar-collapsed");
+      return saved === "true";
+    }
+    return false;
+  });
+  
   const [mobileOpen, setMobileOpen] = useState(false);
   const [loggingOut, setLoggingOut] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
@@ -54,6 +62,14 @@ const SideBarDashboardWrapper = ({ children }: SideBarDashboardWrapperProps) => 
   const accessToken = useAppSelector((state) => state.auth.accessToken);
   const refreshToken = useAppSelector((state) => state.auth.refreshToken);
   const userMenuRef = useRef<HTMLDivElement>(null);
+
+  // Save collapsed state to localStorage when changed (desktop only)
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      localStorage.setItem("sidebar-collapsed", collapsed.toString());
+    }
+  }, [collapsed]);
+
   useEffect(() => {
     const handleResize = () => {
       if (window.innerWidth >= 1024 && mobileOpen) {
@@ -176,13 +192,10 @@ const SideBarDashboardWrapper = ({ children }: SideBarDashboardWrapperProps) => 
   }
 
   return (
-    // FIX 1 (Mobile gap): Removed `overflow-hidden` from root so the fixed sidebar
-    // doesn't interact with the stacking context. The main content area handles
-    // its own scroll independently.
     <div className="flex h-screen bg-white">
       {loggingOut && <AppLoadingScreen label="Signing out..." />}
 
-      {/* FIX 1 (Mobile gap): Overlay only renders when mobileOpen; z-40 sits below sidebar z-50 */}
+      {/* Overlay for mobile */}
       {mobileOpen && (
         <div
           onClick={() => setMobileOpen(false)}
@@ -192,13 +205,10 @@ const SideBarDashboardWrapper = ({ children }: SideBarDashboardWrapperProps) => 
 
       {/*
         SIDEBAR
-        FIX 1 (Mobile gap):
-          - On mobile: always `fixed`, slide in/out via translate.
-            No `lg:relative` fallback that would inject layout width on mobile.
-          - On desktop (lg+): `relative` so it participates in flex layout normally.
-          - `shrink-0` on desktop only via `lg:shrink-0`.
-        FIX 2 (Collapsed horizontal scroll):
-          - Added `overflow-x-hidden` to the aside so icons never push width beyond w-[72px].
+        - On mobile: fixed, slide in/out via translate
+        - On desktop (lg+): relative so it participates in flex layout normally
+        - shrink-0 on desktop via lg:shrink-0
+        - overflow-x-hidden prevents horizontal scroll when collapsed
       */}
       <aside
         className={`
@@ -331,30 +341,6 @@ const SideBarDashboardWrapper = ({ children }: SideBarDashboardWrapperProps) => 
         {!collapsed && (
           <div className="flex-1 overflow-y-auto overflow-x-hidden">
             <div className="p-3">
-              {/* <div className="mb-3 rounded-xl border border-[#D8D5E2] bg-gradient-to-r from-[#F6F5FF] to-[#F2F7FF] p-3">
-                <div className="flex items-center gap-2 mb-2">
-                  <Coins size={14} className="text-[#0B04CF]" />
-                  <p className="text-xs font-semibold uppercase tracking-wide text-[#0B04CF]">Usage</p>
-                </div>
-                <div className="grid grid-cols-2 gap-2 text-xs">
-                  <div className="rounded-lg bg-white/80 border border-[#E5E7EB] px-2 py-1.5">
-                    <p className="text-gray-500">Projects used</p>
-                    <p className="font-semibold text-gray-900">{entitlement?.projectsCreated ?? 0}</p>
-                  </div>
-                  <div className="rounded-lg bg-white/80 border border-[#E5E7EB] px-2 py-1.5">
-                    <p className="text-gray-500">Tokens left</p>
-                    <p className="font-semibold text-gray-900">{remainingProjects}</p>
-                  </div>
-                  <div className="rounded-lg bg-white/80 border border-[#E5E7EB] px-2 py-1.5">
-                    <p className="text-gray-500">Free quota</p>
-                    <p className="font-semibold text-gray-900">{entitlement?.freeProjectsIncluded ?? 1}</p>
-                  </div>
-                  <div className="rounded-lg bg-white/80 border border-[#E5E7EB] px-2 py-1.5">
-                    <p className="text-gray-500">Paid tokens</p>
-                    <p className="font-semibold text-gray-900">{entitlement?.paidCreditsRemaining ?? user.projectCredits ?? 0}</p>
-                  </div>
-                </div>
-              </div> */}
 
               <div className="relative mb-3">
                 <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
@@ -431,14 +417,6 @@ const SideBarDashboardWrapper = ({ children }: SideBarDashboardWrapperProps) => 
             </div>
           </div>
         )}
-
-        {/*
-          FIX 2 (Collapsed icons horizontal scroll):
-            - Changed container to `overflow-y-auto overflow-x-hidden`
-            - Each icon is centered with `flex items-center justify-center w-full`
-            - Tooltip uses `pointer-events-none` + `z-[60]` to escape the sidebar clip
-            - Removed arbitrary widths that could cause overflow
-        */}
         {collapsed && (
           <div className="flex-1 overflow-y-auto overflow-x-hidden py-2">
             <div className="flex flex-col items-center gap-2 px-2">
@@ -463,10 +441,9 @@ const SideBarDashboardWrapper = ({ children }: SideBarDashboardWrapperProps) => 
                       className={isActive ? "text-blue-600 transition-colors" : "text-gray-400 group-hover:text-[#0B04CF] transition-colors"}
                     />
                   </div>
-                  {/* Tooltip — rendered outside overflow clip via fixed z-index */}
+                  {/* Tooltip */}
                   <div className="absolute left-[calc(100%+8px)] top-1/2 -translate-y-1/2 bg-gray-900 text-white rounded-md px-2.5 py-1.5 whitespace-nowrap opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-[60] shadow-lg max-w-[200px]">
                     <span className="text-xs block truncate">{chat.title}</span>
-                    {/* Arrow */}
                     <span className="absolute right-full top-1/2 -translate-y-1/2 border-4 border-transparent border-r-gray-900" />
                   </div>
                 </Link>
@@ -559,14 +536,7 @@ const SideBarDashboardWrapper = ({ children }: SideBarDashboardWrapperProps) => 
           </div>
         </div>
       </aside>
-
-      {/*
-        MAIN CONTENT
-        FIX 1 (Mobile gap):
-          - On mobile the sidebar is `fixed` and takes no layout space,
-            so this div correctly fills the full width (w-full / flex-1).
-          - On desktop, flex-1 + min-w-0 shares space with the relative sidebar naturally.
-      */}
+      
       <div className="flex-1 flex flex-col min-w-0 overflow-y-auto h-screen bg-gray-50">
         {/* Mobile top bar */}
         <header className="lg:hidden sticky top-0 z-30 border-b border-gray-200 bg-white px-4 h-14 flex items-center justify-between shrink-0">
@@ -594,7 +564,7 @@ const SideBarDashboardWrapper = ({ children }: SideBarDashboardWrapperProps) => 
           </button>
         </header>
 
-        {/* Mobile user menu (bottom-right sheet) */}
+        {/* Mobile user menu */}
         {showUserMenu && (
           <div className="lg:hidden fixed bottom-4 right-4 z-50 bg-white border border-gray-200 rounded-lg shadow-lg overflow-hidden min-w-[200px]">
             <div className="p-3 border-b border-gray-200">

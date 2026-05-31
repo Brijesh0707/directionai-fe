@@ -8,7 +8,7 @@ const defaultDescription =
 const ogImagePath = '/Banner.png';
 
 // Convert to absolute URL for social platforms
-const absoluteOGImage = `${siteUrl}${ogImagePath}`;
+const absoluteOGImage = `https://directionai.sourcesparktech.in/Banner.png`;
 const absoluteLogo = `${siteUrl}/LOGO.png`;
 
 export const sharedKeywords = [

@@ -69,9 +69,9 @@ const LastCTA = () => {
           </Link>
 
           {/* SECONDARY BUTTON */}
-          <button className="h-16 px-10 rounded-2xl border border-white/15 bg-white/5 backdrop-blur-xl text-white font-semibold text-lg hover:bg-white/10 transition-all duration-300">
+          {/* <button className="h-16 px-10 rounded-2xl border border-white/15 bg-white/5 backdrop-blur-xl text-white font-semibold text-lg hover:bg-white/10 transition-all duration-300">
             Talk to an Expert
-          </button>
+          </button> */}
         </div>
 
     

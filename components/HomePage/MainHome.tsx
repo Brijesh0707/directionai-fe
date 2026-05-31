@@ -20,7 +20,7 @@ const MainHome = () => {
    <HowEngineWorks/>
    <Security/>
    <Collobration/>
-   <MarketPlace/>
+   {/* <MarketPlace/> */}
    <Pricing/>
    <LastCTA/>
    </>

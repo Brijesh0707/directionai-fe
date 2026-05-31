@@ -27,11 +27,10 @@ const handlePrint = () => {
 
   if (!content) return;
 
-  const printWindow = window.open("", "_blank", "width=1400,height=1000");
+  const printWindow = window.open("", "_blank", "width=1600,height=1200");
 
   if (!printWindow) return;
 
-  // Clone stylesheets from current app
   const styles = Array.from(document.styleSheets)
     .map((styleSheet) => {
       try {
@@ -59,25 +58,37 @@ const handlePrint = () => {
         ${styles}
 
         <style>
-          html, body {
-            padding: 0;
+          html,
+          body {
             margin: 0;
+            padding: 0;
             background: white;
+            width: 100%;
+            height: auto;
           }
 
           body {
-            padding: 24px;
+            padding: 20px;
+            overflow: visible !important;
+
             -webkit-print-color-adjust: exact !important;
             print-color-adjust: exact !important;
           }
 
-          @page {
-            size: A4;
-            margin: 16mm;
-          }
-
           * {
             box-sizing: border-box;
+          }
+
+          /* REMOVE PAGE CUTS */
+          @page {
+            margin: 0;
+            size: auto;
+          }
+
+          /* PREVENT BREAKS */
+          * {
+            page-break-inside: avoid !important;
+            break-inside: avoid !important;
           }
 
           .print\\:hidden {
@@ -99,6 +110,12 @@ const handlePrint = () => {
           .hover\\:shadow-md:hover {
             box-shadow: none !important;
           }
+
+          /* Ensure full width */
+          #print-root {
+            width: 100%;
+            overflow: visible !important;
+          }
         </style>
       </head>
 
@@ -111,8 +128,7 @@ const handlePrint = () => {
           window.onload = () => {
             setTimeout(() => {
               window.print();
-              window.close();
-            }, 300);
+            }, 500);
           };
         </script>
       </body>

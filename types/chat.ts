@@ -26,6 +26,7 @@ export type DirectionAiConversationItem = {
 
 export type DirectionAiMemory = {
   rawIdea?: string;
+  clarificationNeeded?: boolean;
   project: {
     name: string;
     category: string;

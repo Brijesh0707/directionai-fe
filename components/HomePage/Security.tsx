@@ -43,18 +43,7 @@ const features = [
       "Step-by-step marketing sequences for your specific target audience.",
     icon: BarChart3,
   },
-  {
-    title: "IP Protection",
-    description:
-      "Guidelines for securing your startup's core technological advantages.",
-    icon: ShieldCheck,
-  },
-  {
-    title: "Ecosystem Sync",
-    description:
-      "Integrate with Jira, Linear, and Notion seamlessly.",
-    icon: Network,
-  },
+
   {
     title: "Team Mapping",
     description:

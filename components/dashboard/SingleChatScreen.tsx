@@ -279,10 +279,12 @@ const SingleChatScreen = ({ chatId }: { chatId: string }) => {
   const [pendingUserMessage, setPendingUserMessage] = useState<string | null>(null);
   const [textareaRows, setTextareaRows] = useState(1);
   const [composerFocused, setComposerFocused] = useState(false);
+  const [isMobileKeyboardOpen, setIsMobileKeyboardOpen] = useState(false);
 
   const bottomRef = useRef<HTMLDivElement | null>(null);
   const streamingMsgRef = useRef<HTMLDivElement | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
+  const scrollContainerRef = useRef<HTMLDivElement | null>(null);
   const appliedRecommendedAgentRef = useRef(false);
   const prevSendingRef = useRef(false);
   const lastUserMessageRef = useRef<HTMLDivElement | null>(null);
@@ -314,6 +316,25 @@ const SingleChatScreen = ({ chatId }: { chatId: string }) => {
       });
     }
   }, [loading]);
+
+  // Mobile keyboard detection for better UX
+  useEffect(() => {
+    const handleResize = () => {
+      // On mobile, when keyboard opens, the window inner height decreases significantly
+      const isKeyboardOpen = window.innerHeight < (window.screen.height * 0.75);
+      setIsMobileKeyboardOpen(isKeyboardOpen);
+      
+      // When keyboard opens, scroll to bottom after a tiny delay
+      if (isKeyboardOpen && scrollContainerRef.current) {
+        setTimeout(() => {
+          bottomRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
+        }, 100);
+      }
+    };
+
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   useEffect(() => {
     if (!accessToken) return;
@@ -571,10 +592,18 @@ const SingleChatScreen = ({ chatId }: { chatId: string }) => {
 
       <div className="h-screen bg-[#F3F1F8] flex flex-col overflow-hidden">
 
-        {/* ── Scrollable content ─────────────────────────────────────────────── */}
-        <div className="flex-1 overflow-y-auto scroll-smooth">
-          <div className="max-w-3xl mx-auto px-4 pt-6 pb-52 sm:px-6 sm:pt-10">
-
+        {/* ── Scrollable content with proper padding for fixed composer ────────── */}
+        <div 
+          ref={scrollContainerRef}
+          className="flex-1 overflow-y-auto scroll-smooth"
+          style={{ 
+            paddingBottom: isMobileKeyboardOpen ? '80px' : '100px',
+            transition: 'padding-bottom 0.2s ease-out'
+          }}
+        >
+          <div className="max-w-3xl mx-auto px-4 pt-6 sm:px-6 sm:pt-10">
+            {/* Content wrapper - no extra bottom padding here since parent handles it */}
+            
             {/* Project header */}
             <div className="mb-8 flex items-start justify-between gap-4">
               <div className="min-w-0 flex-1">
@@ -868,59 +897,92 @@ const SingleChatScreen = ({ chatId }: { chatId: string }) => {
           </div>
         </div>
 
-        {/* ── Composer ────────────────────────────────────────────────────────── */}
-        <div className="shrink-0">
-          <div className="max-w-3xl mx-auto px-4 py-3 sm:px-6">
-            <div
-              className={`
-                rounded-2xl border bg-[#F8F7FC] px-4 pt-3 pb-2.5 transition-all duration-200
-                ${composerFocused
-                  ? "border-[#0B04CF]/35 bg-white shadow-[0_0_0_3px_rgba(11,4,207,0.06)]"
-                  : "border-[#D8D5E2] shadow-sm"
-                }
-              `}
-            >
-              <textarea
-                ref={textareaRef}
-                value={draftMessage}
-                onChange={handleTextareaChange}
-                onKeyDown={handleComposerKeyDown}
-                onFocus={() => setComposerFocused(true)}
-                onBlur={() => setComposerFocused(false)}
-                placeholder="Reply to DirectionAI or add more context…"
-                rows={textareaRows}
-                className="w-full resize-none border-0 bg-transparent p-0 text-sm text-gray-900 outline-none placeholder:text-gray-400 leading-relaxed"
-                style={{ minHeight: "24px", maxHeight: "112px", overflowY: textareaRows >= 4 ? "auto" : "hidden" }}
-              />
-              <div className="mt-2 flex items-center justify-between gap-3">
-                <p className="text-[11px] text-gray-400 hidden sm:block select-none">
-                  <kbd className="rounded border border-gray-200 bg-white px-1 py-0.5 font-mono text-[10px] text-gray-500 shadow-sm">↵</kbd>
-                  {" "}send
-                  {" · "}
-                  <kbd className="rounded border border-gray-200 bg-white px-1 py-0.5 font-mono text-[10px] text-gray-500 shadow-sm">⇧↵</kbd>
-                  {" "}new line
-                </p>
-                <button
-                  onClick={() => void handleSendMessage()}
-                  disabled={sendingMessage || !draftMessage.trim()}
-                  className="ml-auto h-9 px-4 rounded-xl bg-gradient-to-r from-[#0B04CF] to-[#1208E8] text-white text-sm font-semibold shadow-md shadow-indigo-500/20 hover:opacity-95 active:scale-[0.97] transition-all duration-150 flex items-center gap-2 disabled:opacity-35 disabled:cursor-not-allowed disabled:shadow-none"
-                >
-                  {sendingMessage ? (
-                    <>
-                      <Loader2 size={14} className="animate-spin" />
-                      <span>Sending</span>
-                    </>
-                  ) : (
-                    <>
-                      <span>Send</span>
-                      <SendHorizonal size={13} />
-                    </>
-                  )}
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
+        {/* ── Fixed Composer (always visible, no scroll issues) ─────────────────── */}
+     <div
+  className="
+    fixed bottom-0 left-0 right-0 z-40
+    bg-gradient-to-t from-[#F3F1F8] via-[#F3F1F8] to-transparent
+    pt-2 pb-[calc(env(safe-area-inset-bottom)+12px)]
+    shadow-[0_-8px_20px_-8px_rgba(0,0,0,0.03)]
+    md:sticky
+  "
+>
+  <div className="max-w-3xl mx-auto px-3 sm:px-6">
+    <div
+      className={`
+        rounded-2xl border bg-[#F8F7FC] px-4 pt-3 pb-2.5
+        transition-all duration-200
+        ${composerFocused
+          ? "border-[#0B04CF]/35 bg-white shadow-[0_0_0_3px_rgba(11,4,207,0.06)]"
+          : "border-[#D8D5E2] shadow-sm"
+        }
+      `}
+    >
+      <textarea
+        ref={textareaRef}
+        value={draftMessage}
+        onChange={handleTextareaChange}
+        onKeyDown={handleComposerKeyDown}
+        onFocus={() => setComposerFocused(true)}
+        onBlur={() => setComposerFocused(false)}
+        placeholder="Reply to DirectionAI or add more context…"
+        rows={textareaRows}
+        className="
+          w-full resize-none border-0 bg-transparent p-0
+          text-sm text-gray-900 outline-none
+          placeholder:text-gray-400 leading-relaxed
+        "
+        style={{
+          minHeight: "24px",
+          maxHeight: "112px",
+          overflowY: textareaRows >= 4 ? "auto" : "hidden",
+        }}
+      />
+
+      <div className="mt-2 flex items-center justify-between gap-3">
+        <p className="hidden sm:block select-none text-[11px] text-gray-400">
+          <kbd className="rounded border border-gray-200 bg-white px-1 py-0.5 font-mono text-[10px] text-gray-500 shadow-sm">
+            ↵
+          </kbd>{" "}
+          send ·{" "}
+          <kbd className="rounded border border-gray-200 bg-white px-1 py-0.5 font-mono text-[10px] text-gray-500 shadow-sm">
+            ⇧↵
+          </kbd>{" "}
+          new line
+        </p>
+
+        <button
+          onClick={() => void handleSendMessage()}
+          disabled={sendingMessage || !draftMessage.trim()}
+          className="
+            ml-auto h-9 px-4 rounded-xl
+            bg-gradient-to-r from-[#0B04CF] to-[#1208E8]
+            text-white text-sm font-semibold
+            shadow-md shadow-indigo-500/20
+            hover:opacity-95 active:scale-[0.97]
+            transition-all duration-150
+            flex items-center gap-2
+            disabled:opacity-35
+            disabled:cursor-not-allowed
+            disabled:shadow-none
+          "
+        >
+          {sendingMessage ? (
+            <>
+              <Loader2 size={14} className="animate-spin" />
+              <span>Sending</span>
+            </>
+          ) : (
+            <>
+              <span>Send</span>
+              <SendHorizonal size={13} />
+            </>
+          )}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
       </div>
 
       <ReportDrawer

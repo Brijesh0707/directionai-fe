@@ -426,6 +426,7 @@ const SingleProjectPage = () => {
       <ReportDrawer
         isOpen={isDrawerOpen}
         isVisible={isDrawerVisible}
+        chatId={slug}
         activeReport={activeReport}
         activeRunData={activeRunData}
         onClose={closeDrawer}

@@ -327,6 +327,17 @@ const LoginScreen = () => {
                   placeholder="••••••••"
                   className="w-full h-14 rounded-2xl border border-border bg-background px-5 text-foreground outline-none focus:border-primary transition-all"
                 />
+                {activeTab === "login" && (
+                  <div className="mt-3 flex justify-end">
+                    <button
+                      type="button"
+                      onClick={() => router.push("/forgot-password")}
+                      className="text-sm font-semibold text-primary hover:underline"
+                    >
+                      Forgot password?
+                    </button>
+                  </div>
+                )}
               </div>
 
               <button

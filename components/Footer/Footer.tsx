@@ -54,19 +54,6 @@ const Footer = () => {
                 Pricing
               </Link>
 
-              <Link
-                href="/dashboard"
-                className="text-muted-foreground hover:text-primary transition-colors text-base"
-              >
-                Dashboard
-              </Link>
-
-              <Link
-                href="/dashboard/settings"
-                className="text-muted-foreground hover:text-primary transition-colors text-base"
-              >
-                Settings
-              </Link>
             </div>
           </div>
 

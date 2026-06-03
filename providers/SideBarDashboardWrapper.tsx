@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef, useMemo } from "react";
+import React, { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
@@ -18,7 +18,9 @@ import {
   FolderKanban,
   Coins,
   BadgeIndianRupee,
+  Bug,
 } from "lucide-react";
+import BugReportModal from "@/components/dashboard/BugReportModal";
 import { authService } from "@/services/auth.service";
 import { chatService } from "@/services/chat.service";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
@@ -45,6 +47,7 @@ const SideBarDashboardWrapper = ({ children }: SideBarDashboardWrapperProps) => 
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
+  const [isBugReportOpen, setIsBugReportOpen] = useState(false);
 
   const [chatHistory, setChatHistory] = useState<ChatSessionSummary[]>([]);
   const [loadingInitial, setLoadingInitial] = useState(true);
@@ -108,46 +111,55 @@ const SideBarDashboardWrapper = ({ children }: SideBarDashboardWrapperProps) => 
     return () => clearTimeout(timer);
   }, [searchQuery]);
 
+  const loadDashboardData = useCallback(async () => {
+    setLoadingInitial(true);
+
+    try {
+      const usage = await chatService.getEntitlement();
+      const sessions = await chatService.listSessions();
+
+      setEntitlement({
+        freeProjectsIncluded: usage.freeProjectsIncluded,
+        projectsCreated: usage.projectsCreated,
+        paidCreditsRemaining: usage.paidCreditsRemaining,
+        remainingProjects: usage.remainingProjects,
+      });
+      const summaries = sessions.map((session: ChatSession) => ({
+        id: session.id,
+        title: session.title,
+        description: session.idea.slice(0, 180),
+        createdAt: session.createdAt,
+      }));
+
+      const filtered = debouncedSearch
+        ? summaries.filter((item) => {
+            const haystack = `${item.title} ${item.description}`.toLowerCase();
+            return haystack.includes(debouncedSearch.toLowerCase());
+          })
+        : summaries;
+
+      setChatHistory(filtered);
+    } catch (error) {
+      console.error("Failed to load chat summaries", error);
+      setEntitlement(null);
+      setChatHistory([]);
+    } finally {
+      setLoadingInitial(false);
+    }
+  }, [debouncedSearch]);
+
   useEffect(() => {
-    const loadFirstPage = async () => {
-      setLoadingInitial(true);
+    void loadDashboardData();
+  }, [loadDashboardData]);
 
-      try {
-        const usage = await chatService.getEntitlement();
-        const sessions = await chatService.listSessions();
-
-        setEntitlement({
-          freeProjectsIncluded: usage.freeProjectsIncluded,
-          projectsCreated: usage.projectsCreated,
-          paidCreditsRemaining: usage.paidCreditsRemaining,
-          remainingProjects: usage.remainingProjects,
-        });
-        const summaries = sessions.map((session: ChatSession) => ({
-          id: session.id,
-          title: session.title,
-          description: session.idea.slice(0, 180),
-          createdAt: session.createdAt,
-        }));
-
-        const filtered = debouncedSearch
-          ? summaries.filter((item) => {
-              const haystack = `${item.title} ${item.description}`.toLowerCase();
-              return haystack.includes(debouncedSearch.toLowerCase());
-            })
-          : summaries;
-
-        setChatHistory(filtered);
-      } catch (error) {
-        console.error("Failed to load chat summaries", error);
-        setEntitlement(null);
-        setChatHistory([]);
-      } finally {
-        setLoadingInitial(false);
-      }
+  useEffect(() => {
+    const handleEntitlementRefresh = () => {
+      void loadDashboardData();
     };
 
-    void loadFirstPage();
-  }, [debouncedSearch]);
+    window.addEventListener("direction:entitlement-updated", handleEntitlementRefresh);
+    return () => window.removeEventListener("direction:entitlement-updated", handleEntitlementRefresh);
+  }, [loadDashboardData]);
 
   const handleLogout = async () => {
     try {
@@ -334,6 +346,16 @@ const SideBarDashboardWrapper = ({ children }: SideBarDashboardWrapperProps) => 
                 </span>
               </span>
             )}
+          </button>
+          <button
+            onClick={() => {
+              setMobileOpen(false);
+              setIsBugReportOpen(true);
+            }}
+            className="mt-2 h-10 rounded-lg border border-gray-200 bg-white text-gray-700 font-medium transition-all duration-200 flex items-center justify-center gap-2 text-sm w-full hover:border-[#0B04CF]/40 hover:text-[#0B04CF]"
+          >
+            <Bug size={16} className="shrink-0" />
+            {!collapsed && <span>Report a Bug</span>}
           </button>
         </div>
 
@@ -592,6 +614,8 @@ const SideBarDashboardWrapper = ({ children }: SideBarDashboardWrapperProps) => 
           <div className="">{children}</div>
         </main>
       </div>
+
+      <BugReportModal isOpen={isBugReportOpen} onClose={() => setIsBugReportOpen(false)} />
     </div>
   );
 };

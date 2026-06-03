@@ -36,7 +36,7 @@ export const ReportSection = ({
   badge?: string;
   children: React.ReactNode;
 }) => (
-  <div className="rounded-xl border border-gray-200 bg-white overflow-hidden shadow-sm">
+  <div className="report-card rounded-xl border border-gray-200 bg-white overflow-hidden shadow-sm print:shadow-none print:break-inside-avoid">
     <div className="border-b border-gray-100 px-5 py-4 bg-gradient-to-r from-[#0B04CF]/5 via-white to-white">
       <div className="flex items-center justify-between flex-wrap gap-2">
         <div className="flex items-center gap-2.5">
@@ -62,7 +62,7 @@ export const MetricCard = ({
   value: string;
   icon: React.ElementType;
 }) => (
-  <div className="rounded-xl bg-gradient-to-br from-white to-gray-50 p-4 border border-gray-200">
+  <div className="report-card rounded-xl bg-gradient-to-br from-white to-gray-50 p-4 border border-gray-200 print:shadow-none print:break-inside-avoid">
     <div className="flex items-center justify-between mb-2">
       <Icon size={18} className="text-[#0B04CF]" />
     </div>

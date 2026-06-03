@@ -102,6 +102,52 @@ html {
   scroll-behavior: smooth;
 }
 
+/* Add to your global.css or equivalent */
+
+/* Prevent page breaks inside report content */
+#agent-report-print-root,
+#agent-report-print-root * {
+  break-inside: avoid;
+  page-break-inside: avoid;
+  break-before: auto;
+  break-after: auto;
+}
+
+/* Ensure full width content without cutting */
+@media print {
+  #agent-report-print-root {
+    width: 100%;
+    padding: 0;
+    margin: 0;
+    overflow: visible !important;
+  }
+  
+  /* Remove any max-width constraints */
+  .report-section {
+    max-width: none !important;
+  }
+  
+  /* Ensure all content fits within page width */
+  body, .report-container, .agent-report-content {
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow: visible !important;
+  }
+  
+  /* Prevent text and content from being cut off */
+  .report-section,
+  .agent-report-content,
+  .report-card {
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+  }
+  
+  /* Adjust tables or wide content for print */
+  table, pre, .wide-content {
+    max-width: 100% !important;
+    overflow-x: auto !important;
+  }
+}
 body {
   background: var(--background);
   color: var(--foreground);

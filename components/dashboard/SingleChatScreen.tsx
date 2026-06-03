@@ -48,6 +48,8 @@ const options = [
   },
 ];
 
+const MAX_CHARACTERS = 2000;
+
 // ─── Streaming cursor ─────────────────────────────────────────────────────────
 const StreamingCursor = () => (
   <span className="inline-block w-[2px] h-[1em] bg-[#0B04CF] ml-0.5 align-middle animate-[blink_0.8s_ease-in-out_infinite]" />
@@ -411,11 +413,18 @@ const SingleChatScreen = ({ chatId }: { chatId: string }) => {
   }, [project?.memoryJson?.conversation]);
 
   const handleTextareaChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setDraftMessage(e.target.value);
-    const lines = e.target.value.split("\n").length;
-    setTextareaRows(Math.min(lines, 4));
-    if (!e.target.value) setTextareaRows(1);
+    const value = e.target.value;
+    if (value.length <= MAX_CHARACTERS) {
+      setDraftMessage(value);
+      const lines = value.split("\n").length;
+      setTextareaRows(Math.min(lines, 4));
+      if (!value) setTextareaRows(1);
+    }
   };
+
+  const characterCount = draftMessage.length;
+  const isNearLimit = characterCount >= MAX_CHARACTERS * 0.9;
+  const isAtLimit = characterCount >= MAX_CHARACTERS;
 
   const toggleOption = (value: string) => {
     const option = options.find((item) => item.title === value);
@@ -470,6 +479,10 @@ const SingleChatScreen = ({ chatId }: { chatId: string }) => {
 
   const directionMemory = project?.memoryJson ?? null;
   const conversation = directionMemory?.conversation ?? [];
+  const agentSummaries = directionMemory?.agentSummaries ?? {};
+  const hasSupportingSummaries = Boolean(
+    agentSummaries.RESEARCH || agentSummaries.MARKETING || agentSummaries.DEVELOPMENT,
+  );
   const isClarifying = Boolean(directionMemory?.clarificationNeeded);
   const hasOpenQuestions =
     isClarifying && (directionMemory?.pendingQuestions?.length ?? 0) > 0;
@@ -802,6 +815,13 @@ const SingleChatScreen = ({ chatId }: { chatId: string }) => {
                                 {option.description}
                                 {completed && <span className="ml-1 text-emerald-600 font-medium">· Completed</span>}
                               </p>
+                              {option.agentType === "PPT" && (
+                                <p className="mt-2 text-[11px] leading-5 text-[#0B04CF]/75 bg-[#0B04CF]/5 border border-[#0B04CF]/10 rounded-lg px-3 py-2">
+                                  {hasSupportingSummaries
+                                    ? "Better if you have Research, Marketing, and Development docs. Also good for pitch deck."
+                                    : "Good for pitch deck. Better with Research, Marketing, and Development docs."}
+                                </p>
+                              )}
                             </div>
                           </div>
                         </button>
@@ -940,16 +960,29 @@ const SingleChatScreen = ({ chatId }: { chatId: string }) => {
       />
 
       <div className="mt-2 flex items-center justify-between gap-3">
-        <p className="hidden sm:block select-none text-[11px] text-gray-400">
-          <kbd className="rounded border border-gray-200 bg-white px-1 py-0.5 font-mono text-[10px] text-gray-500 shadow-sm">
-            ↵
-          </kbd>{" "}
-          send ·{" "}
-          <kbd className="rounded border border-gray-200 bg-white px-1 py-0.5 font-mono text-[10px] text-gray-500 shadow-sm">
-            ⇧↵
-          </kbd>{" "}
-          new line
-        </p>
+        <div className="flex items-center gap-3">
+          <p className="hidden sm:block select-none text-[11px] text-gray-400">
+            <kbd className="rounded border border-gray-200 bg-white px-1 py-0.5 font-mono text-[10px] text-gray-500 shadow-sm">
+              ↵
+            </kbd>{" "}
+            send ·{" "}
+            <kbd className="rounded border border-gray-200 bg-white px-1 py-0.5 font-mono text-[10px] text-gray-500 shadow-sm">
+              ⇧↵
+            </kbd>{" "}
+            new line
+          </p>
+          <span
+            className={`text-[11px] font-medium transition-colors duration-200 ${
+              isAtLimit
+                ? "text-red-500"
+                : isNearLimit
+                ? "text-amber-500"
+                : "text-gray-400"
+            }`}
+          >
+            {characterCount}/{MAX_CHARACTERS}
+          </span>
+        </div>
 
         <button
           onClick={() => void handleSendMessage()}
@@ -988,6 +1021,7 @@ const SingleChatScreen = ({ chatId }: { chatId: string }) => {
       <ReportDrawer
         isOpen={isDrawerOpen}
         isVisible={isDrawerVisible}
+        chatId={chatId}
         activeReport={activeReport}
         activeRunData={activeRunData}
         onClose={closeDrawer}

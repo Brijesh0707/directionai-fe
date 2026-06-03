@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import { Paperclip, SendHorizonal, Zap, AlertTriangle } from "lucide-react";
 import { chatService } from "@/services/chat.service";
 
+const MAX_CHARACTERS = 2000;
+
 const motivationalQuotes = [
   { text: "Validate Your Startup Idea", highlight: "Validate" },
   { text: "Build Something People Want", highlight: "Want" },
@@ -164,7 +166,12 @@ const NewProject = () => {
               <textarea
                 ref={textareaRef}
                 value={idea}
-                onChange={(e) => setIdea(e.target.value)}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  if (value.length <= MAX_CHARACTERS) {
+                    setIdea(value);
+                  }
+                }}
                 onKeyDown={handleKeyDown}
                 placeholder="E.g., Build an AI-powered platform that helps freelancers automate their invoicing and client management..."
                 className="w-full min-h-[120px] bg-transparent resize-none outline-none text-gray-900 scroll-hidden placeholder:text-gray-400 text-base sm:text-lg leading-relaxed p-5 sm:p-6"
@@ -173,23 +180,36 @@ const NewProject = () => {
               />
 
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 px-5 sm:px-6 pb-5 sm:pb-6">
-                <div className="flex items-center gap-2">
-                  <div className="relative group">
-                    <button
-                      disabled
-                      className="w-10 h-10 rounded-lg border border-[#D8D5E2] bg-white cursor-not-allowed flex items-center justify-center text-gray-300"
-                      type="button"
-                    >
-                      <Paperclip size={16} />
-                    </button>
-                    {/* Tooltip */}
-                    <div className="pointer-events-none absolute z-[999] bottom-full left-1/2 -translate-x-1/3 mb-2 whitespace-nowrap rounded-md bg-gray-900 px-2.5 py-1.5 text-xs text-white opacity-0 group-hover:opacity-100 transition-opacity duration-200 shadow-lg">
-                      Feature coming soon
-                      <span className="absolute z-[999] top-full left-1/2 -translate-x-1/3 border-4 border-transparent border-t-gray-900" />
+                <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-2">
+                    <div className="relative group">
+                      <button
+                        disabled
+                        className="w-10 h-10 rounded-lg border border-[#D8D5E2] bg-white cursor-not-allowed flex items-center justify-center text-gray-300"
+                        type="button"
+                      >
+                        <Paperclip size={16} />
+                      </button>
+                      {/* Tooltip */}
+                      <div className="pointer-events-none absolute z-[999] bottom-full left-1/2 -translate-x-1/3 mb-2 whitespace-nowrap rounded-md bg-gray-900 px-2.5 py-1.5 text-xs text-white opacity-0 group-hover:opacity-100 transition-opacity duration-200 shadow-lg">
+                        Feature coming soon
+                        <span className="absolute z-[999] top-full left-1/2 -translate-x-1/3 border-4 border-transparent border-t-gray-900" />
+                      </div>
                     </div>
+                    <span className="text-xs text-gray-400 ml-1 hidden sm:inline">
+                      Attach files
+                    </span>
                   </div>
-                  <span className="text-xs text-gray-400 ml-1 hidden sm:inline">
-                    Attach files
+                  <span
+                    className={`text-[11px] font-medium transition-colors duration-200 ${
+                      idea.length >= MAX_CHARACTERS
+                        ? "text-red-500"
+                        : idea.length >= MAX_CHARACTERS * 0.9
+                        ? "text-amber-500"
+                        : "text-gray-400"
+                    }`}
+                  >
+                    {idea.length}/{MAX_CHARACTERS}
                   </span>
                 </div>
 

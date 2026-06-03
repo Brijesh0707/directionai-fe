@@ -101,10 +101,14 @@ export const chatService = {
     return new EventSource(url);
   },
 
-  async downloadReport(chatId: string, runId: string) {
-    const response = await api.get(`/chat/sessions/${chatId}/reports/${runId}/download`, {
-      responseType: 'blob',
-    });
+  async downloadReport(chatId: string, runId: string, html: string) {
+    const response = await api.post(
+      `/chat/sessions/${chatId}/reports/${runId}/download`,
+      { html },
+      {
+        responseType: 'blob',
+      },
+    );
     return response.data as Blob;
   },
 };

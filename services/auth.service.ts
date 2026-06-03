@@ -1,5 +1,13 @@
 import api from './api';
-import { AuthResponse, PlansResponse, User } from '@/types/auth';
+import {
+  AuthResponse,
+  ForgotPasswordRequestResponse,
+  PlansResponse,
+  RazorpayOrderResponse,
+  RazorpayVerifyResponse,
+  ResetPasswordResponse,
+  User,
+} from '@/types/auth';
 
 export type RegisterInput = { email: string; password: string; name?: string };
 export type LoginInput = { email: string; password: string };
@@ -41,14 +49,32 @@ export const authService = {
     });
     return data;
   },
+  requestPasswordReset: async (email: string) => {
+    const { data } = await api.post<ForgotPasswordRequestResponse>('/auth/forgot-password/request', {
+      email,
+    });
+    return data;
+  },
+  resetPasswordWithOtp: async (payload: { email: string; otp: string; newPassword: string }) => {
+    const { data } = await api.post<ResetPasswordResponse>('/auth/forgot-password/reset', payload);
+    return data;
+  },
   getPlans: async () => {
     const { data } = await api.get<PlansResponse>('/auth/plans');
     return data;
   },
-  purchasePlan: async (planCode: 'PROJECT_20' | 'PROJECT_30') => {
-    const { data } = await api.post<{ message: string; user: User }>('/auth/plans/purchase', {
+  createPlanOrder: async (planCode: 'PROJECT_20' | 'PROJECT_30') => {
+    const { data } = await api.post<RazorpayOrderResponse>('/auth/plans/purchase', {
       planCode,
     });
+    return data;
+  },
+  verifyPlanPayment: async (payload: {
+    razorpayOrderId: string;
+    razorpayPaymentId: string;
+    razorpaySignature: string;
+  }) => {
+    const { data } = await api.post<RazorpayVerifyResponse>('/auth/plans/verify', payload);
     return data;
   },
 };

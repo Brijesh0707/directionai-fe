@@ -2,15 +2,20 @@
 
 import React, { useState } from "react";
 import SideBarDashboardWrapper from "@/providers/SideBarDashboardWrapper";
-import { Bell, Shield, FileText, LogOut } from "lucide-react";
+import { Bell, Shield, FileText, LogOut, Loader2, Sparkles } from "lucide-react";
 import { authService } from "@/services/auth.service";
+import { loadRazorpayScript } from "@/services/razorpay.service";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
-import { clearSession } from "@/store/authSlice";
+import { clearSession, updateUser } from "@/store/authSlice";
 import { useRouter } from "next/navigation";
+import toast from "react-hot-toast";
+
+type PlanCode = "PROJECT_20" | "PROJECT_30";
 
 const SettingsPage = () => {
   const [notifications, setNotifications] = useState(true);
   const [loggingOut, setLoggingOut] = useState(false);
+  const [loadingPlan, setLoadingPlan] = useState<PlanCode | null>(null);
   const refreshToken = useAppSelector((state) => state.auth.refreshToken);
   const user = useAppSelector((state) => state.auth.user);
   const dispatch = useAppDispatch();
@@ -32,8 +37,78 @@ const SettingsPage = () => {
     }
   };
 
-  const handleBuy = async (planCode: "PROJECT_20" | "PROJECT_30") => {
-    setPlanNotice(`Razorpay coming soon for ${planCode}. Tokens are not updated yet.`);
+  const handleBuy = async (planCode: PlanCode) => {
+    if (loadingPlan) return;
+
+    setPlanNotice("");
+    setLoadingPlan(planCode);
+
+    try {
+      const orderResponse = await authService.createPlanOrder(planCode);
+      const loaded = await loadRazorpayScript();
+      if (!loaded || !window.Razorpay) {
+        throw new Error("Unable to load Razorpay checkout. Please try again.");
+      }
+
+      const checkout = new window.Razorpay({
+        key: orderResponse.razorpayKeyId || process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || "",
+        amount: orderResponse.order.amountPaise,
+        currency: "INR",
+        name: "Direction AI",
+        description: `${orderResponse.plan.name} - ${orderResponse.plan.projects} project credits`,
+        order_id: orderResponse.order.orderId,
+        prefill: {
+          name: user?.name ?? undefined,
+          email: user?.email ?? undefined,
+        },
+        theme: {
+          color: "#0B04CF",
+        },
+        notes: {
+          planCode: orderResponse.plan.code,
+          planName: orderResponse.plan.name,
+        },
+        handler: async (response) => {
+          try {
+            const verified = await authService.verifyPlanPayment({
+              razorpayOrderId: response.razorpay_order_id,
+              razorpayPaymentId: response.razorpay_payment_id,
+              razorpaySignature: response.razorpay_signature,
+            });
+
+            dispatch(updateUser(verified.user));
+            window.dispatchEvent(new Event("direction:entitlement-updated"));
+            setPlanNotice(`${verified.plan.name} activated successfully.`);
+            toast.success(`${verified.plan.name} activated successfully.`);
+          } catch (error) {
+            const message = error instanceof Error ? error.message : "Payment verification failed";
+            setPlanNotice(message);
+            toast.error(message);
+          } finally {
+            setLoadingPlan(null);
+          }
+        },
+        modal: {
+          ondismiss: () => {
+            setLoadingPlan(null);
+          },
+        },
+      });
+
+      checkout.on("payment.failed", (payload) => {
+        const message = payload?.reason || "Payment failed. No credits were added.";
+        setPlanNotice(message);
+        toast.error(message);
+        setLoadingPlan(null);
+      });
+
+      checkout.open();
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Unable to start checkout";
+      setPlanNotice(message);
+      toast.error(message);
+      setLoadingPlan(null);
+    }
   };
 
   return (
@@ -50,11 +125,21 @@ const SettingsPage = () => {
                 Plan: {user?.planTier ?? "free"} | Remaining paid credits: {user?.projectCredits ?? 0}
               </p>
               <div className="mt-4 flex flex-wrap gap-3">
-                <button onClick={() => void handleBuy("PROJECT_20")} className="h-9 px-4 rounded-xl bg-primary text-white text-sm font-semibold">
-                  Buy Now (20)
+                <button
+                  onClick={() => void handleBuy("PROJECT_20")}
+                  disabled={loadingPlan !== null}
+                  className="h-9 px-4 rounded-xl bg-primary text-white text-sm font-semibold flex items-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
+                >
+                  {loadingPlan === "PROJECT_20" ? <Loader2 size={14} className="animate-spin" /> : <Sparkles size={14} />}
+                  {loadingPlan === "PROJECT_20" ? "Processing..." : "Buy Now (20)"}
                 </button>
-                <button onClick={() => void handleBuy("PROJECT_30")} className="h-9 px-4 rounded-xl border border-border text-foreground text-sm font-semibold">
-                  Buy Now (30)
+                <button
+                  onClick={() => void handleBuy("PROJECT_30")}
+                  disabled={loadingPlan !== null}
+                  className="h-9 px-4 rounded-xl border border-border text-foreground text-sm font-semibold flex items-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
+                >
+                  {loadingPlan === "PROJECT_30" ? <Loader2 size={14} className="animate-spin" /> : <Sparkles size={14} />}
+                  {loadingPlan === "PROJECT_30" ? "Processing..." : "Buy Now (30)"}
                 </button>
               </div>
               {planNotice && <p className="mt-3 text-xs text-amber-600 font-medium">{planNotice}</p>}

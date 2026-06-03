@@ -21,7 +21,7 @@ const MainHome = () => {
    <Security/>
    <Collobration/>
    {/* <MarketPlace/> */}
-   <Pricing/>
+   {/* <Pricing/> */}
    <LastCTA/>
    </>
   )

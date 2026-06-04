@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   Rocket,
   Building2,
@@ -65,13 +65,22 @@ const OnboardingProcess = () => {
   const [selectedGoal, setSelectedGoal] = useState("Build an MVP");
   const [selectedStage, setSelectedStage] = useState(0);
   const [saving, setSaving] = useState(false);
-
+  const [contentHeight, setContentHeight] = useState<number | null>(null);
+  
+  const contentRef = useRef<HTMLDivElement>(null);
   const dispatch = useAppDispatch();
   const router = useRouter();
   const user = useAppSelector((state) => state.auth.user);
   const accessToken = useAppSelector((state) => state.auth.accessToken);
 
-  React.useEffect(() => {
+  // Measure content height to adjust main container
+  useEffect(() => {
+    if (contentRef.current) {
+      setContentHeight(contentRef.current.scrollHeight);
+    }
+  }, [currentQuestion, selectedUser, selectedSource, selectedGoal, selectedStage]);
+
+  useEffect(() => {
     if (!user || !accessToken) {
       router.replace("/login");
       return;
@@ -151,7 +160,7 @@ const OnboardingProcess = () => {
     switch (currentQuestion) {
       case "userType":
         return (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
             {userTypes.map((item, index) => {
               const Icon = item.icon;
               const active = selectedUser === item.title;
@@ -160,18 +169,18 @@ const OnboardingProcess = () => {
                 <button
                   key={index}
                   onClick={() => setSelectedUser(item.title)}
-                  className={`group relative rounded-2xl border p-5 text-left transition-all duration-300 hover:-translate-y-1 ${
+                  className={`group relative rounded-xl md:rounded-2xl border p-4 md:p-5 text-left transition-all duration-300 active:scale-[0.98] ${
                     active ? "border-primary bg-primary/5 shadow-lg" : "border-border bg-background hover:border-primary/30"
                   }`}
                 >
-                  <div className={`w-12 h-12 rounded-2xl flex items-center justify-center mb-5 ${active ? "gradient-primary" : "bg-primary/10"}`}>
-                    <Icon size={22} className={active ? "text-white" : "text-primary"} />
+                  <div className={`w-10 h-10 md:w-12 md:h-12 rounded-xl md:rounded-2xl flex items-center justify-center mb-3 md:mb-5 ${active ? "gradient-primary" : "bg-primary/10"}`}>
+                    <Icon size={20} className={active ? "text-white" : "text-primary"} />
                   </div>
-                  <h3 className="text-lg font-bold text-foreground leading-tight">{item.title}</h3>
-                  <p className="mt-2 text-sm leading-6 text-muted-foreground">{item.subtitle}</p>
+                  <h3 className="text-base md:text-lg font-bold text-foreground leading-tight">{item.title}</h3>
+                  <p className="mt-1 text-xs md:text-sm leading-5 text-muted-foreground">{item.subtitle}</p>
                   {active && (
-                    <div className="absolute top-4 right-4 w-6 h-6 rounded-full gradient-primary flex items-center justify-center">
-                      <Check size={14} className="text-white" />
+                    <div className="absolute top-3 right-3 w-5 h-5 rounded-full gradient-primary flex items-center justify-center">
+                      <Check size={12} className="text-white" />
                     </div>
                   )}
                 </button>
@@ -182,12 +191,12 @@ const OnboardingProcess = () => {
 
       case "source":
         return (
-          <div className="flex flex-wrap gap-3">
+          <div className="flex flex-wrap gap-2 md:gap-3">
             {sources.map((source, index) => (
               <button
                 key={index}
                 onClick={() => setSelectedSource(source)}
-                className={`h-12 px-5 rounded-2xl border text-sm font-semibold transition-all duration-300 ${
+                className={`h-10 md:h-12 px-4 md:px-5 rounded-xl md:rounded-2xl border text-sm font-semibold transition-all duration-300 active:scale-[0.98] ${
                   selectedSource === source
                     ? "gradient-primary text-white border-primary shadow-lg"
                     : "border-border bg-background text-foreground hover:border-primary hover:text-primary"
@@ -201,7 +210,7 @@ const OnboardingProcess = () => {
 
       case "goal":
         return (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-3 md:gap-4">
             {goals.map((goal, index) => {
               const active = selectedGoal === goal.title;
 
@@ -209,17 +218,17 @@ const OnboardingProcess = () => {
                 <button
                   key={index}
                   onClick={() => setSelectedGoal(goal.title)}
-                  className={`relative rounded-2xl border p-5 text-left transition-all duration-300 hover:-translate-y-1 ${
+                  className={`relative rounded-xl md:rounded-2xl border p-4 md:p-5 text-left transition-all duration-300 active:scale-[0.98] ${
                     active ? "border-primary bg-primary/5 shadow-lg" : "border-border bg-background hover:border-primary/30"
                   }`}
                 >
-                  <div className="flex items-start gap-4">
-                    <div className={`w-6 h-6 rounded-lg border flex items-center justify-center mt-1 ${active ? "gradient-primary border-primary" : "border-border"}`}>
-                      {active && <Check size={14} className="text-white" />}
+                  <div className="flex items-start gap-3 md:gap-4">
+                    <div className={`w-5 h-5 rounded-lg border flex items-center justify-center mt-0.5 ${active ? "gradient-primary border-primary" : "border-border"}`}>
+                      {active && <Check size={12} className="text-white" />}
                     </div>
                     <div>
-                      <h3 className="text-lg font-bold text-foreground">{goal.title}</h3>
-                      <p className="mt-2 text-sm leading-7 text-muted-foreground">{goal.subtitle}</p>
+                      <h3 className="text-base md:text-lg font-bold text-foreground">{goal.title}</h3>
+                      <p className="mt-1 text-xs md:text-sm leading-6 text-muted-foreground">{goal.subtitle}</p>
                     </div>
                   </div>
                 </button>
@@ -230,22 +239,40 @@ const OnboardingProcess = () => {
 
       case "stage":
         return (
-          <div className="relative">
-            <div className="absolute top-4 left-0 w-full h-[2px] bg-border" />
-
+          <div className="relative py-4 md:py-6">
+            {/* Progress Bar Background */}
+            <div className="absolute top-1/2 left-0 w-full h-1 bg-border -translate-y-1/2 rounded-full" />
+            
+            {/* Progress Bar Fill */}
             <div
-              className="absolute top-4 left-0 h-[2px] gradient-primary transition-all duration-500"
+              className="absolute top-1/2 left-0 h-1 gradient-primary transition-all duration-500 rounded-full -translate-y-1/2"
               style={{ width: `${(selectedStage / (stages.length - 1)) * 100}%` }}
             />
 
-            <div className="relative flex items-center justify-between gap-4">
+            {/* Stage Buttons */}
+            <div className="relative flex items-center justify-between gap-2 md:gap-4">
               {stages.map((stage, index) => {
                 const active = selectedStage >= index;
+                const isCurrent = selectedStage === index;
 
                 return (
-                  <button key={index} onClick={() => setSelectedStage(index)} className="flex flex-col items-center text-center group">
-                    <div className={`w-8 h-8 rounded-full border-4 transition-all duration-300 ${active ? "border-primary bg-primary shadow-lg" : "border-border bg-background"}`} />
-                    <span className={`mt-4 text-xs sm:text-sm font-semibold leading-5 transition-all duration-300 ${active ? "text-primary" : "text-muted-foreground"}`}>
+                  <button 
+                    key={index} 
+                    onClick={() => setSelectedStage(index)} 
+                    className="flex flex-col items-center text-center group flex-1"
+                  >
+                    <div className={`relative w-7 h-7 md:w-8 md:h-8 rounded-full border-4 transition-all duration-300 ${
+                      active ? "border-primary bg-primary shadow-lg" : "border-border bg-background"
+                    } ${isCurrent ? "ring-2 ring-primary/30 ring-offset-2" : ""}`}>
+                      {active && index === selectedStage && (
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          <Check size={10} className="text-white" />
+                        </div>
+                      )}
+                    </div>
+                    <span className={`mt-2 text-[10px] sm:text-xs md:text-sm font-semibold leading-tight transition-all duration-300 ${
+                      active ? "text-primary" : "text-muted-foreground"
+                    } max-w-[60px] sm:max-w-none`}>
                       {stage}
                     </span>
                   </button>
@@ -261,103 +288,124 @@ const OnboardingProcess = () => {
   };
 
   return (
-    <section className="min-h-screen bg-background overflow-hidden relative">
+    <div className="min-h-screen bg-background relative flex flex-col">
+      {/* Background Blobs - Hidden on mobile for performance */}
+      <div className="hidden md:block absolute top-0 left-0 w-80 h-80 bg-primary/10 blur-3xl rounded-full" />
+      <div className="hidden md:block absolute bottom-0 right-0 w-80 h-80 bg-secondary/10 blur-3xl rounded-full" />
+
       {saving && <AppLoadingScreen label="Saving onboarding..." />}
 
-      <div className="absolute top-0 left-0 w-80 h-80 bg-primary/10 blur-3xl rounded-full" />
-      <div className="absolute bottom-0 right-0 w-80 h-80 bg-secondary/10 blur-3xl rounded-full" />
-
-      <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-12">
-        <div className="rounded-3xl border border-border bg-card/80 backdrop-blur-xl overflow-hidden">
-          <div className="p-6 sm:p-8 border-b border-border">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-primary/10 bg-primary/5 mb-6">
-              <Sparkles size={14} className="text-primary" />
-              <span className="text-xs sm:text-sm font-semibold text-primary">Welcome to Direction AI</span>
-            </div>
-
-            <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-foreground leading-tight">
-              Let&apos;s Personalize Your
-              <span className="text-primary"> Startup Workspace</span>
-            </h1>
-
-            <p className="mt-4 text-base sm:text-lg leading-7 text-muted-foreground max-w-2xl">
-              We&apos;ll ask a few quick questions to better understand your goals, startup stage, and workflow.
-            </p>
-          </div>
-
-          <div className="px-6 sm:px-8 pt-6">
-            <div className="flex items-center justify-between gap-2 mb-2">
-              {questions.map((q, idx) => (
-                <div key={q.key} className={`flex-1 h-1 rounded-full transition-all duration-300 ${idx <= currentIndex ? "gradient-primary" : "bg-border"}`} />
-              ))}
-            </div>
-            <div className="flex justify-between text-xs text-muted-foreground">
-              <span>Role</span>
-              <span>Source</span>
-              <span>Goal</span>
-              <span>Stage</span>
-            </div>
-          </div>
-
-          <div className="p-6 sm:p-8">
-            <div className="mb-8">
-              <div className="inline-flex items-center justify-center w-10 h-10 rounded-xl bg-primary/10 text-primary font-bold mb-4">
-                {currentIndex + 1}
+      {/* Scrollable Content Area */}
+      <div className="flex-1 overflow-y-auto">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-12">
+          <div className="rounded-2xl md:rounded-3xl border border-border bg-card/80 backdrop-blur-xl overflow-hidden">
+            {/* Header Section */}
+            <div className="p-5 sm:p-6 md:p-8 border-b border-border">
+              <div className="inline-flex items-center gap-2 px-3 py-1.5 md:px-4 md:py-2 rounded-full border border-primary/10 bg-primary/5 mb-4 md:mb-6">
+                <Sparkles size={12} className="text-primary" />
+                <span className="text-xs sm:text-sm font-semibold text-primary">Welcome to Direction AI</span>
               </div>
-              <h2 className="text-2xl font-bold text-foreground">{questions[currentIndex].title}</h2>
-              <p className="mt-2 text-muted-foreground">{questions[currentIndex].description}</p>
-            </div>
-            {renderQuestion()}
-          </div>
 
-          <div className="border-t border-border p-6 sm:p-8 flex flex-col sm:flex-row items-center justify-between gap-5">
-            <div className="flex items-center gap-3 text-muted-foreground text-sm order-2 sm:order-1">
-              <div className="w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center">
-                <Sparkles size={14} className="text-primary" />
+              <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-tight text-foreground leading-tight">
+                Let&apos;s Personalize Your
+                <span className="text-primary"> Startup Workspace</span>
+              </h1>
+
+              <p className="mt-3 text-sm sm:text-base md:text-lg leading-6 text-muted-foreground max-w-2xl">
+                We&apos;ll ask a few quick questions to better understand your goals, startup stage, and workflow.
+              </p>
+            </div>
+
+            {/* Progress Steps - More compact on mobile */}
+            <div className="px-5 sm:px-6 md:px-8 pt-5 md:pt-6">
+              <div className="flex items-center justify-between gap-1 mb-1.5">
+                {questions.map((q, idx) => (
+                  <div key={q.key} className={`flex-1 h-1 rounded-full transition-all duration-300 ${idx <= currentIndex ? "gradient-primary" : "bg-border"}`} />
+                ))}
               </div>
-              This helps Direction AI generate smarter startup blueprints.
+              <div className="flex justify-between text-[10px] sm:text-xs text-muted-foreground">
+                <span>Role</span>
+                <span>Source</span>
+                <span>Goal</span>
+                <span>Stage</span>
+              </div>
             </div>
 
-            <div className="flex items-center gap-4 w-full sm:w-auto order-1 sm:order-2">
+            {/* Question Content - Ref with scroll padding */}
+            <div ref={contentRef} className="pb-32 md:pb-36">
+              <div className="p-5 sm:p-6 md:p-8">
+                <div className="mb-6 md:mb-8">
+                  <div className="inline-flex items-center justify-center w-8 h-8 md:w-10 md:h-10 rounded-lg md:rounded-xl bg-primary/10 text-primary font-bold text-sm md:text-base mb-3 md:mb-4">
+                    {currentIndex + 1}
+                  </div>
+                  <h2 className="text-xl md:text-2xl font-bold text-foreground">{questions[currentIndex].title}</h2>
+                  <p className="mt-1 text-sm text-muted-foreground">{questions[currentIndex].description}</p>
+                </div>
+                {renderQuestion()}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Sticky Footer - Always visible at bottom */}
+      <div className="sticky bottom-0 left-0 right-0 z-20 bg-background/95 backdrop-blur-md border-t border-border">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-3 md:py-4">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
+            {/* Helper Text - Hidden on very small screens */}
+            <div className="hidden sm:flex items-center gap-2 text-xs text-muted-foreground">
+              <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center">
+                <Sparkles size={12} className="text-primary" />
+              </div>
+              <span>Helps us generate smarter startup blueprints</span>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex items-center justify-center gap-3 w-full sm:w-auto">
               {!isFirst && (
                 <button
                   onClick={handlePrev}
-                  className="flex items-center justify-center gap-2 h-12 px-6 rounded-2xl border border-border bg-background text-foreground font-semibold hover:border-primary hover:text-primary transition-all duration-300"
+                  className="flex items-center justify-center gap-2 h-10 md:h-11 px-4 md:px-5 rounded-xl md:rounded-2xl border border-border bg-background text-foreground font-semibold text-sm hover:border-primary hover:text-primary transition-all duration-300 active:scale-[0.98]"
                 >
-                  <ArrowLeft size={18} /> Back
+                  <ArrowLeft size={16} /> Back
                 </button>
               )}
 
               {!isLast ? (
                 <button
                   onClick={handleNext}
-                  className="group flex-1 sm:flex-none h-12 px-7 rounded-2xl gradient-primary text-white font-semibold shadow-lg hover:scale-[1.02] transition-all duration-300 flex items-center justify-center gap-3"
+                  className="group flex-1 sm:flex-none h-10 md:h-11 px-5 md:px-6 rounded-xl md:rounded-2xl gradient-primary text-white font-semibold shadow-lg hover:shadow-xl transition-all duration-300 active:scale-[0.98] flex items-center justify-center gap-2 text-sm"
                 >
                   Next
-                  <ArrowRight size={18} className="transition-transform duration-300 group-hover:translate-x-1" />
+                  <ArrowRight size={16} className="transition-transform duration-300 group-hover:translate-x-0.5" />
                 </button>
               ) : (
-                <div className="flex gap-3 w-full sm:w-auto">
+                <div className="flex gap-2 w-full">
                   <button
                     onClick={() => saveAndGoDashboard(true)}
-                    className="h-12 px-6 rounded-2xl border border-border bg-background text-muted-foreground font-semibold hover:border-primary hover:text-primary transition-all duration-300"
+                    className="flex-1 h-10 md:h-11 px-4 md:px-5 rounded-xl md:rounded-2xl border border-border bg-background text-muted-foreground font-semibold text-sm hover:border-primary hover:text-primary transition-all duration-300 active:scale-[0.98]"
                   >
-                    Skip for now
+                    Skip
                   </button>
                   <button
                     onClick={() => saveAndGoDashboard(false)}
-                    className="group h-12 px-7 rounded-2xl gradient-primary text-white font-semibold shadow-lg hover:scale-[1.02] transition-all duration-300 flex items-center justify-center gap-3"
+                    className="group flex-[2] h-10 md:h-11 px-4 md:px-6 rounded-xl md:rounded-2xl gradient-primary text-white font-semibold shadow-lg hover:shadow-xl transition-all duration-300 active:scale-[0.98] flex items-center justify-center gap-2 text-sm"
                   >
-                    Continue to Workspace
-                    <ArrowRight size={18} className="transition-transform duration-300 group-hover:translate-x-1" />
+                    Continue
+                    <ArrowRight size={16} className="transition-transform duration-300 group-hover:translate-x-0.5" />
                   </button>
                 </div>
               )}
             </div>
           </div>
+          
+          {/* Mobile helper text */}
+          <div className="sm:hidden text-center mt-2">
+            <span className="text-[10px] text-muted-foreground">Helps generate smarter startup blueprints</span>
+          </div>
         </div>
       </div>
-    </section>
+    </div>
   );
 };
 
